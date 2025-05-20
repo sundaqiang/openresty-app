@@ -1,0 +1,37 @@
+types {
+    # 文本类
+    text/html                             html htm shtml;
+    text/css                              css;
+    text/plain                            txt;
+
+    # 图片类
+    image/gif                             gif;
+    image/jpeg                            jpeg jpg;
+    image/png                             png;
+    image/svg+xml                         svg svgz;
+    image/webp                            webp;
+
+    # 字体类
+    font/woff                             woff;
+    font/woff2                            woff2;
+    font/ttf                              ttf;
+
+    # 应用类
+    application/javascript                js;
+    application/json                      json;
+    application/pdf                       pdf;
+    application/xhtml+xml                 xhtml;
+    application/xml                       xml;
+    application/zip                       zip;
+
+    # 音视频类
+    audio/mpeg                            mp3;
+    video/mp4                             mp4;
+    video/webm                            webm;
+
+    # 二进制流
+    application/octet-stream              bin exe dll;
+
+    # 默认类型
+    default_type                          application/octet-stream;
+}
