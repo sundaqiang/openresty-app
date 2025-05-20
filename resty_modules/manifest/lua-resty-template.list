@@ -1,0 +1,6 @@
+lualib/resty/template.lua
+lualib/resty/template/microbenchmark.lua
+lualib/resty/template/safe.lua
+lualib/resty/template/html.lua
+pod/lua-resty-template-2.0/lua-resty-template-2.0.pod
+pod/lua-resty-template-2.0/changes.pod

@@ -1,0 +1,155 @@
+# BEGIN lua-resty-template
+
+dist lua-resty-template-2.0
+  aliases resty.template
+  modules changes lua-resty-template-2.0
+
+module changes
+  section 18 3771 changelog
+  section 145 1039 added
+  section 1039 1189 changed
+  section 1189 1375 fixed
+  section 1375 1475 added
+  section 1475 1598 changed
+  section 1598 1724 added
+  section 1724 1928 fixed
+  section 1928 2027 added
+  section 2027 2286 added
+  section 2286 2435 fixed
+  section 2435 2526 added
+  section 2526 2900 changed
+  section 2900 3036 added
+  section 3036 3175 fixed
+  section 3175 3376 fixed
+  section 3376 3517 added
+  section 3517 3699 changed
+  section 3699 3771 added
+
+module lua-resty-template-2.0
+  aliases resty.template
+  section 18 60560 lua-resty-template
+  section 537 1400 hello world with lua-resty-template
+  section 941 1055 view.html
+  section 1055 1400 output
+  section 1400 3877 contents
+  section 3877 8931 template syntax
+  section 5402 5849 short escaping syntax
+  section 5849 6340 a word about complex keys in context table
+  section 6340 6828 a word about html escaping
+  section 6828 6846 example
+  section 6846 7133 lua
+  section 7133 7320 view.html
+  section 7320 7456 header.html
+  section 7456 7503 footer.html
+  section 7503 8543 reserved context keys and remarks
+  section 8543 8590 lua
+  section 8590 8705 view.html
+  section 8705 8931 view.html
+  section 8931 9601 installation
+  section 9325 9415 using openresty package manager (opm)
+  section 9415 9601 using luarocks
+  section 9601 12000 nginx / openresty configuration
+  section 10496 10897 using document_root
+  section 10897 11378 using template_root
+  section 11378 12000 using template_location
+  section 12000 30083 lua api
+  section 12018 12361 template.root
+  section 12361 12753 template.location
+  section 12753 14706 table template.new(view, layout)
+  section 14706 15227 example
+  section 15227 15997 boolean template.caching(boolean or nil)
+  section 15997 17116 function, boolean template.compile(view, cache_key, plain)
+  section 17116 17508 example
+  section 17508 17637 function, boolean template.compile_string(view, cache_key)
+  section 17637 17765 function, boolean template.compile_file(view, cache_key)
+  section 17765 21081 template.visit(func)
+  section 21081 21927 string template.process(view, context, cache_key, plain)
+  section 21927 22063 string template.process_string(view, context, cache_key)
+  section 22063 22198 string template.process_file(view, context, cache_key)
+  section 22198 23047 template.render(view, context, cache_key, plain)
+  section 23047 23174 template.render_string(view, context, cache_key)
+  section 23174 23300 template.render_file(view, context, cache_key)
+  section 23300 24168 string template.parse(view, plain)
+  section 24168 24274 string template.parse_string(view, plain)
+  section 24274 24379 string template.parse_file(view, plain)
+  section 24379 25742 string template.precompile(view, path, strip, plain)
+  section 25742 25871 string template.precompile_string(view, path, strip)
+  section 25871 25999 string template.precompile_file(view, path, strip)
+  section 25999 29308 string template.load(view, plain)
+  section 29308 29398 string template.load_string(view)
+  section 29398 29487 string template.load_file(view)
+  section 29487 30083 template.print
+  section 30083 31107 template precompilation
+  section 30733 30922 precompiling template, and output it as a binary file
+  section 30922 31107 load precompiled template file, and run it with context parameters
+  section 31107 34453 template helpers
+  section 31134 32100 built-in helpers
+  section 31161 31725 echo(...)
+  section 31725 32100 include(view, context)
+  section 32100 34453 other ways to extend
+  section 33084 33397 example
+  section 33397 33997 lua
+  section 33997 34453 output
+  section 34453 49259 usage examples
+  section 34478 35413 template including
+  section 34818 35009 lua
+  section 35009 35183 include.html
+  section 35183 35250 user.html
+  section 35250 35413 outut
+  section 35413 37515 views with layouts
+  section 35530 36513 lua
+  section 36513 36560 view.html
+  section 36560 36722 layout.html
+  section 36722 36791 alternatively you can define the layout in a view as well:
+  section 36791 36974 lua
+  section 36974 37053 view.html
+  section 37053 37129 section.html
+  section 37129 37292 layout.html
+  section 37292 37515 output
+  section 37515 38773 using blocks
+  section 37664 37915 lua
+  section 37915 38108 view.html
+  section 38108 38391 layout.html
+  section 38391 38773 output
+  section 38773 40711 grandfather-father-son inheritance
+  section 39079 39159 lua
+  section 39159 39509 base.html
+  section 39509 39747 layout1.html
+  section 39747 40033 layout2.html
+  section 40033 40375 page.html
+  section 40375 40711 page.html
+  section 40711 43035 macros
+  section 43035 43349 calling methods in templates
+  section 43148 43303 lua
+  section 43303 43349 output
+  section 43349 44763 embedding angular or other tags / templating inside the templates
+  section 44763 46215 embedding markdown inside the templates
+  section 45051 45314 lua
+  section 45314 45566 output
+  section 45566 45876 lua
+  section 45876 46215 output
+  section 46215 49259 lua server pages (lsp) with openresty
+  section 46974 47605 nginx.conf:
+  section 47605 48119 index.lsp
+  section 48119 48342 layouts/default.lsp
+  section 48342 48467 include/header.lsp
+  section 48467 49259 output
+  section 49259 49815 faq
+  section 49273 49505 how do i clear the template cache
+  section 49505 49815 where is lua-resty-template used
+  section 49815 52626 alternatives
+  section 52626 58032 benchmarks
+  section 53240 53564 lua
+  section 53564 54187 lua 5.1.5  copyright (c) 1994-2012 lua.org, puc-rio
+  section 54187 54810 lua 5.2.4  copyright (c) 1994-2015 lua.org, puc-rio
+  section 54810 55433 lua 5.3.5  copyright (c) 1994-2018 lua.org, puc-rio
+  section 55433 56056 lua 5.4.0  copyright (c) 1994-2019 lua.org, puc-rio
+  section 56056 56697 luajit 2.0.5 -- copyright (c) 2005-2017 mike pall. http://luajit.org/
+  section 56697 57344 luajit 2.1.0-beta3 -- copyright (c) 2005-2017 mike pall. http://luajit.org/
+  section 57344 58032 resty (resty 0.23, nginx version: openresty/1.15.8.2)
+  section 58032 58198 changes
+  section 58198 58642 see also
+  section 58642 58824 roadmap
+  section 58824 60560 license
+
+# END lua-resty-template

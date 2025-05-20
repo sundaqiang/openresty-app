@@ -1,0 +1,354 @@
+=encoding utf-8
+
+
+=head1 Changelog
+
+
+All notable changes to C<lua-resty-template> will be documented in this file.
+
+
+=head2 [2.0] - 2020-02-24
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Support for C<template.new()>, C<template.new(options)> and C<template.new(safe)> (a C<boolean>)
+
+=item *
+
+Added C<safe> implementation C<require "resty.template.safe">
+
+=item *
+
+Added C<echo> helper function to template (#28)
+
+=item *
+
+Added C<template.load_file> and C<template.load_string> functions
+
+=item *
+
+Added C<template.compile_file> and C<template.compile_string> functions
+
+=item *
+
+Added C<template.parse_file> and C<template.parse_string> functions
+
+=item *
+
+Added C<template.render_file> and C<template.render_string> functions
+
+=item *
+
+Added C<template.precompile_file> and C<template.precompile_string> functions
+
+=item *
+
+Added C<template.process>, C<template.process_file> and C<template.process_string> functions
+
+=item *
+
+Added C<template.root> and C<template.location> properties
+
+=item *
+
+Added C<template.visit> function (#36)
+
+
+=back
+
+
+=head3 Changed
+
+
+=over
+
+
+=item *
+
+When C<plain> equals to C<false> the file io issues are considered
+fatal, and assertions are thrown (#32)
+
+
+=back
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+Wrong template returned when using multiple server blocks (#25)
+
+=item *
+
+Add a pure lua configure method (#23, #7)
+
+
+=back
+
+
+=head2 [1.9] - 2016-09-29
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Support for the official OpenResty package manager (opm).
+
+
+=back
+
+
+=head3 Changed
+
+
+=over
+
+
+=item *
+
+Changed the change log format to keep-a-changelog.
+
+
+=back
+
+
+=head2 [1.8] - 2016-06-14
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Allow pass layout as a template object to template.new.
+
+
+=back
+
+
+=head2 [1.7] - 2016-05-11
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+The loadngx was not working properly on non-file input.
+See also: https://github.com/bungle/lua-resty-template/pull/19
+Thanks @zhoukk
+
+
+=back
+
+
+=head2 [1.6] - 2016-04-25
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added short escaping syntax.
+
+
+=back
+
+
+=head2 [1.5] - 2015-02-10
+
+
+=head3 Added 
+
+
+=over
+
+
+=item *
+
+Support for {-verbatim-}...{-verbatim-}, and {-raw-}...{-raw-} blocks
+(contents is not processed by template).
+Please note that this could break your templates if you have used
+blocks with names "verbatim" or "raw".
+
+
+=back
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+Issue #8: not returning value when using template.new and its render
+function.
+
+
+=back
+
+
+=head2 [1.4] - 2014-12-03
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added support for {[expression include]} syntax.
+
+
+=back
+
+
+=head3 Changed
+
+
+=over
+
+
+=item *
+
+Rewrote template.parse (cleaned up, less repetition of code, and
+better handling of new lines - i.e. doesn't eat newlines anymore.
+Also some adjustments to preceding spaces (space, tab, NUL-byte,
+and vertical tabs) on some tags ({% ... %}, {-block-} ... {-block-},
+and {# ... #}) for a cleaner output.
+
+
+=back
+
+
+=head2 [1.3] - 2014-11-06
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Small modification to html helper example to handle valueless tag
+attributess in HTML5 style.
+
+
+=back
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+Fixed a bug when a view was missing from context when using layouts.
+
+
+=back
+
+
+=head2 [1.2] - 2014-09-29
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+Fixes nasty recursion bug (reported in bug #5) where sub-templates
+modify the context table. Thank you for reporting this @DDarko.
+
+
+=back
+
+
+=head2 [1.1] - 2014-09-10
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added _VERSION information to the module.
+
+=item *
+
+Added CHANGES file to the project (this file).
+
+
+=back
+
+
+=head3 Changed
+
+
+=over
+
+
+=item *
+
+Lua E<gt> 5.1 uses _ENV instead of _G (Lua 5.1 uses _G). Future Proofing
+if Lua is deprecating _G in Lua 5.3.
+
+
+=back
+
+
+=head2 [1.0] - 2014-08-28
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+LuaRocks Support via MoonRocks.
+
+=back
+
