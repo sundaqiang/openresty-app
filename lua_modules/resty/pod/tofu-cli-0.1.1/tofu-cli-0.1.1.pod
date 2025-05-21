@@ -1,0 +1,14 @@
+=encoding utf-8
+
+
+=head1 tofu-cli
+
+
+创建和管理基于tofu(豆腐)framework 的项目
+
+
+=head2 状态
+
+
+alpha 阶段, 目前仅支持 linux/unix 环境
+
