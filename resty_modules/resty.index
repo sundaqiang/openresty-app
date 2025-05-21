@@ -383,3 +383,23 @@ module tofu-middleware-jwt-0.1.1
   section 945 2026 配置options
 
 # END tofu-middleware-jwt
+# BEGIN lua-utility
+
+dist lua-utility-0.3
+  aliases utility
+  modules lua-utility-0.3
+
+module lua-utility-0.3
+  aliases utility
+  section 18 6055 lua-utility
+  section 162 218 requirements
+  section 218 5790 usage
+  section 1257 2193 base
+  section 2193 3418 array
+  section 3418 3761 function
+  section 3761 5043 object
+  section 5043 5790 string
+  section 5790 5934 tests
+  section 5934 6055 license
+
+# END lua-utility
