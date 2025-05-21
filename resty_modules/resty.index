@@ -174,3 +174,34 @@ module lua-resty-logger-0.2.1
   section 5552 5678 license
 
 # END lua-resty-logger
+# BEGIN lua-resty-router
+
+dist lua-resty-router-2.81
+  aliases resty.router
+  modules lua-resty-router-2.81 lua-resty-router-2.81
+
+module lua-resty-router-2.81
+  aliases resty.router
+  section 18 103 lua-resty-router
+  section 103 283 quick start
+  section 283 861 api
+  section 297 373 new
+  section 373 519 insert
+  section 519 702 extend
+  section 702 861 match
+  section 861 4111 synopsis
+  section 3962 4111 reference
+
+module lua-resty-router-2.81
+  aliases resty.router
+  section 18 103 lua-resty-router
+  section 103 283 quick start
+  section 283 861 api
+  section 297 373 new
+  section 373 519 insert
+  section 519 702 extend
+  section 702 861 match
+  section 861 4111 synopsis
+  section 3962 4111 reference
+
+# END lua-resty-router
