@@ -403,3 +403,17 @@ module lua-utility-0.3
   section 5934 6055 license
 
 # END lua-utility
+# BEGIN lua-fs-module
+
+dist lua-fs-module-0.1
+  aliases fs.module
+  modules lua-fs-module-0.1
+
+module lua-fs-module-0.1
+  aliases fs.module
+  section 18 1792 lua-fs-module
+  section 166 595 api
+  section 595 1670 usage
+  section 1670 1792 license
+
+# END lua-fs-module
