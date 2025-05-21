@@ -205,3 +205,181 @@ module lua-resty-router-2.81
   section 3962 4111 reference
 
 # END lua-resty-router
+# BEGIN lua-resty-http
+
+dist lua-resty-http-0.17.1
+  aliases resty.http
+  modules lua-resty-http-0.17.1
+
+module lua-resty-http-0.17.1
+  aliases resty.http
+  section 18 13725 lua-resty-http
+  section 176 358 status
+  section 358 844 features
+  section 844 1536 api
+  section 1335 1536 deprecated
+  section 1536 13725 usage
+  section 2218 3025 single-shot request
+  section 3025 13725 streamed request
+  section 13725 14817 response
+  section 13744 14538 res.body\_reader
+  section 14538 14647 res:read\_body
+  section 14647 14817 res:read\_trailers
+  section 14817 16509 utility
+  section 14835 15475 parse\_uri
+  section 15475 16509 get\_client\_body\_reader
+  section 16509 20595 deprecated
+  section 16621 17136 tcp only connect
+  section 17136 19230 connect\_proxy
+  section 19230 19601 ssl\_handshake
+  section 19601 20595 proxy\_request / proxy\_response
+  section 19944 20306 proxy\_request
+  section 20306 20595 proxy\_response
+  section 20595 20721 author
+  section 20721 22158 licence
+
+# END lua-resty-http
+# BEGIN lua-resty-ipmatcher
+
+dist lua-resty-ipmatcher-0.31
+  aliases resty.ipmatcher
+  modules lua-resty-ipmatcher-0.31 lua-resty-ipmatcher-0.31
+
+module lua-resty-ipmatcher-0.31
+  aliases resty.ipmatcher
+  section 18 3318 lua-resty-ipmatcher
+  section 102 396 api
+  section 396 893 ipmatcher.new
+  section 893 2200 ipmatcher.new_with_value
+  section 2200 2517 ip.match
+  section 2517 2805 ip.match_bin
+  section 2805 3018 ipmatcher.parse_ipv4
+  section 3018 3318 ipmatcher.parse_ipv6
+
+module lua-resty-ipmatcher-0.31
+  aliases resty.ipmatcher
+  section 18 3318 lua-resty-ipmatcher
+  section 102 396 api
+  section 396 893 ipmatcher.new
+  section 893 2200 ipmatcher.new_with_value
+  section 2200 2517 ip.match
+  section 2517 2805 ip.match_bin
+  section 2805 3018 ipmatcher.parse_ipv4
+  section 3018 3318 ipmatcher.parse_ipv6
+
+# END lua-resty-ipmatcher
+# BEGIN lua-resty-openssl
+
+dist lua-resty-openssl-1.5.2
+  aliases resty.openssl
+  modules lua-resty-openssl-1.5.2 lua-resty-openssl-1.5.2
+
+module lua-resty-openssl-1.5.2
+  aliases resty.openssl
+  section 18 544 lua-resty-openssl
+  section 544 684 description
+  section 684 713 status
+  section 713 1619 synopsis
+  section 1619 3073 copyright and license
+  section 3073 3871 see also
+
+module lua-resty-openssl-1.5.2
+  aliases resty.openssl
+
+# END lua-resty-openssl
+# BEGIN ip2proxy-resty
+
+dist ip2proxy-resty-3.4.0
+  modules changes ip2proxy-resty-3.4.0
+
+module changes
+  section 18 598 revision history for ip2proxy
+
+module ip2proxy-resty-3.4.0
+  section 18 7890 ip2proxy openresty package
+  section 846 912 installation
+  section 912 948 query using the bin file
+  section 948 3142 functions
+  section 3142 4754 usage
+  section 4754 4818 query using the ip2proxy proxy detection web service
+  section 4818 5696 functions
+  section 5696 7890 usage
+
+# END ip2proxy-resty
+# BEGIN lua-resty-dotenv
+
+dist lua-resty-dotenv-1.35
+  aliases resty.dotenv
+  modules lua-resty-dotenv-1.35 lua-resty-dotenv-1.35 prompt
+
+module lua-resty-dotenv-1.35
+  aliases resty.dotenv
+  section 18 105 lua-resty-dotenv
+  section 105 459 usage
+  section 459 1837 synopsis
+  section 478 1111 .env
+  section 1111 1837 output
+
+module lua-resty-dotenv-1.35
+  aliases resty.dotenv
+  section 18 105 lua-resty-dotenv
+  section 105 459 usage
+  section 459 1837 synopsis
+  section 478 1111 .env
+  section 1111 1837 output
+
+module prompt
+
+# END lua-resty-dotenv
+# BEGIN ip2location-resty
+
+dist ip2location-resty-8.7.1
+  modules changes ip2location-resty-8.7.1
+
+module changes
+  section 18 693 revision history for ip2location
+
+module ip2location-resty-8.7.1
+  section 18 16918 ip2location openresty package
+  section 1897 1966 installation
+  section 1966 2002 query using the bin file
+  section 2002 2305 dependencies
+  section 2305 2478 ipv4 bin vs ipv6 bin
+  section 2478 3777 methods
+  section 3777 6088 usage
+  section 6088 6139 query using the ip2location web service
+  section 6139 8625 methods
+  section 8625 16918 usage
+
+# END ip2location-resty
+# BEGIN lua-resty-qqwry
+
+dist lua-resty-qqwry-0.01
+  aliases resty.qqwry
+  modules lua-resty-qqwry-0.01
+
+module lua-resty-qqwry-0.01
+  aliases resty.qqwry
+  section 18 1753 lua-resty-qqwry
+
+# END lua-resty-qqwry
+# BEGIN tofu-middleware-cors
+
+dist tofu-middleware-cors-0.1.1
+  modules tofu-middleware-cors-0.1.1
+
+module tofu-middleware-cors-0.1.1
+  section 18 1291 tofu-middleware-cors
+  section 628 1291 配置options
+
+# END tofu-middleware-cors
+# BEGIN tofu-middleware-jwt
+
+dist tofu-middleware-jwt-0.1.1
+  modules tofu-middleware-jwt-0.1.1
+
+module tofu-middleware-jwt-0.1.1
+  section 18 2026 tofu-middleware-jwt
+  section 945 2026 配置options
+
+# END tofu-middleware-jwt

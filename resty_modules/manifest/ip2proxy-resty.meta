@@ -1,0 +1,12 @@
+account = ip2location
+name = ip2proxy-resty
+abstract = IP2Proxy proxy detection library for OpenResty
+author = IP2Location.com
+is_original = yes
+license = mit
+repo_link = https://github.com/ip2location/ip2proxy-resty
+lib_dir = lib
+doc_dir = lib
+version = 3.4.0
+main_module = lib/ip2proxy.lua
+requires = openresty >= 1.19.9.1, fffonion/lua-resty-openssl, xiangnanscu/lua-resty-ipmatcher, ledgetech/lua-resty-http

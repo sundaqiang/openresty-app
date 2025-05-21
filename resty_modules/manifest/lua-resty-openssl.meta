@@ -1,0 +1,12 @@
+account = fffonion
+name = lua-resty-openssl
+abstract = FFI-based OpenSSL binding for LuaJIT
+author = fffonion
+is_original = yes
+license = 3bsd
+repo_link = https://github.com/fffonion/lua-resty-openssl
+lib_dir = lib
+doc_dir = lib
+version = 1.5.2
+main_module = lib/resty/openssl.lua
+requires = luajit

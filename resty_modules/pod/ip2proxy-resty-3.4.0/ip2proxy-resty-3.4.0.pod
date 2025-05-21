@@ -1,0 +1,175 @@
+=encoding utf-8
+
+
+=head1 IP2Proxy OpenResty Package
+
+
+This package allows user to query an IP address if it was being used as VPN anonymizer, open proxies, web proxies, Tor exits, data center, web hosting (DCH) range, search engine robots (SES), residential proxies (RES), consumer privacy networks (CPN), and enterprise private networks (EPN). It lookup the proxy IP address from B<IP2Proxy BIN Data> file. This data file can be downloaded at
+
+
+=over
+
+
+=item *
+
+Free IP2Proxy BIN Data: https://lite.ip2location.com
+
+=item *
+
+Commercial IP2Proxy BIN Data: https://www.ip2location.com/database/ip2proxy
+
+
+=back
+
+As an alternative, this package can also call the IP2Proxy Web Service. This requires an API key. If you don't have an existing API key, you can subscribe for one at the below:
+
+https://www.ip2location.com/web-service/ip2proxy
+
+
+=head2 Installation
+
+
+
+    opm get ip2location/ip2proxy-resty
+
+
+=head2 QUERY USING THE BIN FILE
+
+
+
+=head2 Functions
+
+Below are the functions supported in this package.
+
+|Function Name|Description|
+|---|---|
+|open|Open the IP2Proxy BIN data for lookup.|
+|close|Close and clean up the file pointer.|
+|get_package_version|Get the package version (1 to 11 for PX1 to PX11 respectively).|
+|get_module_version|Get the module version.|
+|get_database_version|Get the database version.|
+|isproxy|Check whether if an IP address was a proxy. Returned value:E<lt>ulE<gt><liE<gt>-1 : errorsE<lt>/liE<gt><liE<gt>0 : not a proxyE<lt>/liE<gt><liE<gt>1 : a proxyE<lt>/liE<gt><liE<gt>2 : a data center IP address or search engine robotE<lt>/liE<gt></ulE<gt>|
+|get_all|Return the proxy information in an object.|
+|get_proxytype|Return the proxy type. Please visit E<lt>a href="https://www.ip2location.com/database/px10-ip-proxytype-country-region-city-isp-domain-usagetype-asn-lastseen-threat-residential" target="_blank"E<gt>IP2LocationE<lt>/aE<gt> for the list of proxy types supported|
+|get_country_short|Return the ISO3166-1 country code (2-digits) of the proxy.|
+|get_country_long|Return the ISO3166-1 country name of the proxy.|
+|get_region|Return the ISO3166-2 region name of the proxy. Please visit E<lt>a href="https://www.ip2location.com/free/iso3166-2" target="_blank"E<gt>ISO3166-2 Subdivision CodeE<lt>/aE<gt> for the information of ISO3166-2 supported|
+|get_city|Return the city name of the proxy.|
+|get_isp|Return the ISP name of the proxy.|
+|get_domain|Return the domain name of the proxy.|
+|get_usagetype|Return the usage type classification of the proxy. Please visit E<lt>a href="https://www.ip2location.com/database/px10-ip-proxytype-country-region-city-isp-domain-usagetype-asn-lastseen-threat-residential" target="_blank"E<gt>IP2LocationE<lt>/aE<gt> for the list of usage types supported.|
+|get_asn|Return the autonomous system number of the proxy.|
+|get_as|Return the autonomous system name of the proxy.|
+|get_lastseen|Return the number of days that the proxy was last seen.|
+|get_threat|Return the threat type of the proxy.|
+|get_provider|Return the provider of the proxy.|
+|get_fraudscore|Return the potential risk score (0 - 99) associated with IP address.|
+
+
+=head2 Usage
+
+
+
+    worker_processes  1;
+    error_log logs/error.log;
+    events {
+        worker_connections 1024;
+    }
+    http {
+        server {
+            listen 8080 reuseport;
+            location / {
+                default_type text/html;
+                content_by_lua_block {
+                    ip2proxy = require('ip2proxy')
+                    local ip2prox = ip2proxy:open('/usr/local/ip2location/IP2PROXY-IP-PROXYTYPE-COUNTRY-REGION-CITY-ISP-DOMAIN-USAGETYPE-ASN-LASTSEEN-THREAT-RESIDENTIAL-PROVIDER-FRAUDSCORE.BIN')
+                    local result = ip2prox:get_all('8.8.8.8')
+                    ngx.say("isproxy: " .. result.isproxy)
+                    ngx.say("proxytype: " .. result.proxytype)
+                    ngx.say("country_short: " .. result.country_short)
+                    ngx.say("country_long: " .. result.country_long)
+                    ngx.say("region: " .. result.region)
+                    ngx.say("city: " .. result.city)
+                    ngx.say("isp: " .. result.isp)
+                    ngx.say("domain: " .. result.domain)
+                    ngx.say("usagetype: " .. result.usagetype)
+                    ngx.say("asn: " .. result.asn)
+                    ngx.say("as: " .. result.as)
+                    ngx.say("lastseen: " .. result.lastseen)
+                    ngx.say("threat: " .. result.threat)
+                    ngx.say("provider: " .. result.provider)
+                    ngx.say("fraudscore: " .. result.fraudscore)
+                    ip2prox:close()
+                }
+            }
+        }
+    }
+    
+
+
+=head2 QUERY USING THE IP2PROXY PROXY DETECTION WEB SERVICE
+
+
+
+=head2 Functions
+
+Below are the functions supported in this package.
+
+|Function Name|Description|
+|---|---|
+|open|Expects 3 input parameters:E<lt>olE<gt><liE<gt>IP2Proxy API Key.E<lt>/liE<gt><liE<gt>Package (PX1 - PX11)E<lt>/liE<gt></liE<gt><liE<gt>Use HTTPS or HTTPE<lt>/liE<gt></olE<gt> |
+|lookup|Query IP address. This function returns a table containing the proxy info. E<lt>ulE<gt><liE<gt>countryCodeE<lt>/liE<gt><liE<gt>countryNameE<lt>/liE<gt><liE<gt>regionNameE<lt>/liE<gt><liE<gt>cityNameE<lt>/liE<gt><liE<gt>ispE<lt>/liE<gt><liE<gt>domainE<lt>/liE<gt><liE<gt>usageTypeE<lt>/liE<gt><liE<gt>asnE<lt>/liE<gt><liE<gt>asE<lt>/liE<gt><liE<gt>lastSeenE<lt>/liE<gt><liE<gt>threatE<lt>/liE<gt><liE<gt>proxyTypeE<lt>/liE<gt><liE<gt>isProxyE<lt>/liE<gt><liE<gt>providerE<lt>/liE<gt><ulE<gt>|
+|get_credit|This function returns the web service credit balance in a table.|
+
+
+=head2 Usage
+
+
+
+    worker_processes  1;
+    error_log logs/error.log;
+    events {
+        worker_connections 1024;
+    }
+    http {
+        resolver 8.8.8.8;
+        server {
+            listen 8080 reuseport;
+            location / {
+                default_type text/html;
+                content_by_lua_block {
+                    local apikey = 'YOUR_API_KEY'
+                    local apipackage = 'PX11'
+                    local usessl = true
+                    local ip = '8.8.8.8'
+                    ip2proxywebservice = require('ip2proxywebservice')
+                    local ws = ip2proxywebservice:open(apikey, apipackage, usessl)
+                    local result = ws:lookup(ip)
+                    if result["response"] ~= nil then
+                        if result.response == "OK" then
+                            ngx.say("countryCode: " .. result.countryCode)
+                            ngx.say("countryName: " .. result.countryName)
+                            ngx.say("regionName: " .. result.regionName)
+                            ngx.say("cityName: " .. result.cityName)
+                            ngx.say("isp: " .. result.isp)
+                            ngx.say("domain: " .. result.domain)
+                            ngx.say("usageType: " .. result.usageType)
+                            ngx.say("asn: " .. result.asn)
+                            ngx.say("as: " .. result.as)
+                            ngx.say("lastSeen: " .. result.lastSeen)
+                            ngx.say("threat: " .. result.threat)
+                            ngx.say("provider: " .. result.provider)
+                            ngx.say("proxyType: " .. result.proxyType)
+                            ngx.say("isProxy: " .. result.isProxy)
+                        else
+                            print("Error: " .. result.response)
+                        end
+                    end
+                    local result2 = ws:get_credit()
+                    if result2["response"] ~= nil then
+                        ngx.say("Credit Balance: " .. result2.response)
+                    end
+                }
+            }
+        }
+    }

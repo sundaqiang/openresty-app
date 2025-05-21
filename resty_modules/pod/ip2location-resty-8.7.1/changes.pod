@@ -1,0 +1,114 @@
+=encoding utf-8
+
+
+=head1 Revision history for ip2location
+
+
+
+=head2 8.7.1  -- 2024-12-12
+
+
+
+=over
+
+
+=item *
+
+Fixed error with IPv6 IP when using IPv4 BIN.
+
+=item *
+
+Fixed number overflow.
+
+
+=back
+
+
+=head2 8.7.0  -- 2023-04-13
+
+
+
+=over
+
+
+=item *
+
+Added support for district, ASN and AS.
+
+
+=back
+
+
+=head2 8.6.3  -- 2023-03-07
+
+
+
+=over
+
+
+=item *
+
+Fixed overflow issue.
+
+
+=back
+
+
+=head2 8.6.2  -- 2022-07-26
+
+
+
+=over
+
+
+=item *
+
+Fixed undeclared variable.
+
+
+=back
+
+
+=head2 8.6.1  -- 2022-07-05
+
+
+
+=over
+
+
+=item *
+
+Fixed big integer issue.
+
+
+=back
+
+
+=head2 8.6.0  -- 2022-07-05
+
+
+
+=over
+
+
+=item *
+
+Reduced file I/O.
+
+
+=back
+
+
+=head2 8.5.0  -- 2021-12-22
+
+
+
+=over
+
+
+=item *
+
+Initial version.
+
+=back
+

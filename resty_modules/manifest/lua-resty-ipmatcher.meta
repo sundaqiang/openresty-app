@@ -1,0 +1,11 @@
+account = xiangnanscu
+name = lua-resty-ipmatcher
+abstract = opm package for => High performance match IP address for OpenResty Lua.
+author = Nan Xiang(@xiangnanscu)
+is_original = no
+license = apache2
+repo_link = https://github.com/xiangnanscu/lua-resty-ipmatcher
+lib_dir = lib
+doc_dir = lib
+version = 0.31
+main_module = lib/resty/ipmatcher.lua

@@ -1,0 +1,12 @@
+account = ip2location
+name = ip2location-resty
+abstract = IP2Location geolocation library for OpenResty
+author = IP2Location.com
+is_original = yes
+license = mit
+repo_link = https://github.com/ip2location/ip2location-resty
+lib_dir = lib
+doc_dir = lib
+version = 8.7.1
+main_module = lib/ip2location.lua
+requires = openresty >= 1.19.9.1, fffonion/lua-resty-openssl, xiangnanscu/lua-resty-ipmatcher, ledgetech/lua-resty-http
