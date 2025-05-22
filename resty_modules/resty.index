@@ -286,51 +286,34 @@ module ip2proxy-resty-3.4.0
   section 5696 7890 usage
 
 # END ip2proxy-resty
-# BEGIN lua-resty-route
+# BEGIN lua-resty-router
 
-dist lua-resty-route-0.1
-  aliases resty.route
-  modules lua-resty-route-0.1
+dist lua-resty-router-2.81
+  aliases resty.router
+  modules lua-resty-router-2.81 lua-resty-router-2.81
 
-module lua-resty-route-0.1
-  aliases resty.route
-  section 18 22184 lua-resty-route
-  section 218 4923 matchers
-  section 1288 1989 prefix matcher
-  section 1989 2520 equals matcher
-  section 2520 3335 match matcher
-  section 3335 3921 regex matcher
-  section 3921 4923 simple matcher
-  section 4923 11756 routing
-  section 5557 8576 http routing
-  section 6264 6779 the general pattern in routing
-  section 6779 7066 defining routes as a table
-  section 7066 7264 using lua packages for routing
-  section 7264 7369 defining multiple methods at once
-  section 7369 7579 defining multiple routes at once
-  section 7579 7698 routing all the http request methods
-  section 7698 7760 the catch all route
-  section 7760 8576 going crazy with routing
-  section 8576 8605 websockets routing
-  section 8605 10891 file system routing
-  section 10891 11756 named routes
-  section 11756 14330 middleware
-  section 14330 18987 events
-  section 15768 18987 router api
-  section 16086 16790 router.context
-  section 16790 17198 router.yield()
-  section 17198 17442 router:redirect(uri, code)
-  section 17442 17645 router:exit(uri, code)
-  section 17645 17804 router:exec(uri, args)
-  section 17804 17973 router:done()
-  section 17973 18134 router:abort()
-  section 18134 18429 router:fail(error, code)
-  section 18429 18527 router:to(location, method)
-  section 18527 18717 router:render(content, context)
-  section 18717 18835 router:json(data)
-  section 18835 18987 router:*
-  section 18987 20651 roadmap
-  section 20651 21103 see also
-  section 21103 22184 license
+module lua-resty-router-2.81
+  aliases resty.router
+  section 18 103 lua-resty-router
+  section 103 283 quick start
+  section 283 861 api
+  section 297 373 new
+  section 373 519 insert
+  section 519 702 extend
+  section 702 861 match
+  section 861 4111 synopsis
+  section 3962 4111 reference
 
-# END lua-resty-route
+module lua-resty-router-2.81
+  aliases resty.router
+  section 18 103 lua-resty-router
+  section 103 283 quick start
+  section 283 861 api
+  section 297 373 new
+  section 373 519 insert
+  section 519 702 extend
+  section 702 861 match
+  section 861 4111 synopsis
+  section 3962 4111 reference
+
+# END lua-resty-router
