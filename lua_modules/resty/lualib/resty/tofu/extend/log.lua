@@ -1,5 +1,5 @@
 --
--- @file log.lua
+-- @file logger.lua
 -- @author d
 -- @brief 日志
 --
@@ -73,7 +73,7 @@ local function _dump(obj, opt)
 		return tostring(obj)
 	end
 	opt = opt or {level=1}
-	local pretty = opt.pretty 
+	local pretty = opt.pretty
 	local level = opt.level or 1
 	local indent_str = pretty and _rep('\t', level) or ''
 	local tpl = {}
@@ -91,7 +91,7 @@ local function _dump(obj, opt)
 		else
 			k = ''
 		end
-		
+
 		local vt = type(v)
 		if 'table' == vt then
 				opt.level = level + 1
@@ -102,16 +102,16 @@ local function _dump(obj, opt)
 			elseif 'function' == vt then
 				tpl[#tpl + 1] = _fmt('%s%s%s',indent_str, k, 'function')
 			else
-				tpl[#tpl + 1] = _fmt('%s%s%s',indent_str, k, tostring(v))	
+				tpl[#tpl + 1] = _fmt('%s%s%s',indent_str, k, tostring(v))
 			end
 		end
 
 	end
-	
+
 	return pretty
 		and '{\n' .. _concat(tpl, ',\n') .. '\n'.. _rep('\t', level - 1) .. '}'
 		or	'{' .. _concat(tpl, ',') .. '}'
-					
+
 end
 
 
@@ -141,7 +141,7 @@ local function _log(self, lvl, ...)
 	end
 
 	local r_lvl = _r_levels[lvl]
-	
+
 	local assobj = {
 		datetime	= _date('%Y-%m-%d %H:%M:%S'),
 		level			= r_lvl,
@@ -180,7 +180,7 @@ local function _new(opts)
 	}
 
 	-- ---------------------------
-	-- make pointfree style 
+	-- make pointfree style
 	--
 	local obj = {}
 
@@ -190,8 +190,8 @@ local function _new(opts)
 		end
 		return self._level
 	end
-	
-	
+
+
 	function obj.d(...)
 		-- local info	= debug.getinfo(2)
 		-- local fn		= info.short_src
@@ -200,7 +200,7 @@ local function _new(opts)
 		-- _log(self, _levels.DEBUG, pre, ...)
 		_log(self, _levels.DEBUG, ...)
 	end
-	
+
 	function obj.i(...)
 		_log(self, _levels.INFO, ...)
 	end
@@ -208,17 +208,17 @@ local function _new(opts)
 	function obj.n(...)
 		_log(self, _levels.NOTICE, ...)
 	end
-	
+
 	function obj.w(...)
 		_log(self, _levels.WARN, ...)
 	end
-	
+
 	function obj.e(...)
 		_log(self, _levels.ERR, ...)
 	end
 
 	return obj
-	
+
 end
 
 
@@ -255,7 +255,7 @@ function _M.console(opts)
 	local function printer()
 		local fd = io.open('/dev/stdout', 'ab')
 		fd:setvbuf('no')
-		return function (lvl, msg) 
+		return function (lvl, msg)
 			fd:write(msg)
 		end
 	end
@@ -285,7 +285,7 @@ function _M.file(opts)
 			suffix = suffix or ''
 		end
 		local fd = nil
-		return function (lvl, msg) 
+		return function (lvl, msg)
 			if 'day' == rotate and file then
 				local day = os.date('%Y-%m-%d')
 				local cur_file = prefix .. '.' .. day .. '.' .. suffix
