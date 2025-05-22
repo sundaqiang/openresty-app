@@ -2,8 +2,10 @@ local _M = {}
 
 local default_format = '${datetime} [${level}] [${trace}] ${msg}'
 
-local fmt, gsub, match, rep, date, concat, sort =
-string.format, string.gsub, string.match, string.rep, os.date, table.concat, table.sort
+local bit = require("bit")
+
+local fmt, gsub, rep, date, concat, sort =
+string.format, string.gsub, string.rep, os.date, table.concat, table.sort
 
 local levels = {
     STDERR = ngx.STDERR,
@@ -21,19 +23,87 @@ _M.levels = levels
 local r_levels = {}
 for k,v in pairs(levels) do r_levels[v] = k:lower() end
 
+-- 色表统一定义（只留一份）
 local colors = {
-    BLACK=30, RED=31, GREEN=32, YELLOW=33,
-    BLUE=34, MAGENTA=35, CYAN=36, WHITE=37
+    BLACK=0, RED=4, GREEN=2, YELLOW=6,
+    BLUE=1, MAGENTA=5, CYAN=3, WHITE=7,
+    RESET=-1,
 }
-_M.colors = colors
+_M.colors=colors
 
-local lvl_colors = {
+-- 日志等级对应颜色（小写key）
+local lvl_colors={
     stderr=colors.RED, emerg=colors.MAGENTA,
     alert=colors.BLUE, crit=colors.BLUE,
     err=colors.RED, warn=colors.YELLOW,
     notice=colors.CYAN, info=colors.WHITE,
     debug=colors.GREEN
 }
+
+local IS_WINDOWS = package.config:sub(1,1) == '\\'
+local ffi
+if IS_WINDOWS then
+    ffi = require("ffi")
+    ffi.cdef[[
+        typedef int BOOL;
+        typedef void* HANDLE;
+        HANDLE GetStdHandle(int nStdHandle);
+        int WriteConsoleW(HANDLE hConsoleOutput, const wchar_t* lpBuffer, unsigned long nNumberOfCharsToWrite, unsigned long* lpNumberOfCharsWritten, void* lpReserved);
+        BOOL SetConsoleTextAttribute(HANDLE hConsoleOutput, unsigned short wAttributes);
+    ]]
+end
+
+function utf8_to_utf16_buf(str)
+    local tab = {}
+    local i = 1
+    while i <= #str do
+        local c = str:byte(i)
+        if c < 0x80 then
+            table.insert(tab, c)
+            i = i + 1
+        elseif c < 0xE0 then
+            local c2 = str:byte(i+1)
+            table.insert(tab,
+                    bit.bor(
+                            bit.lshift(bit.band(c, 0x1F), 6),
+                            bit.band(c2, 0x3F)
+                    )
+            )
+            i = i + 2
+        elseif c < 0xF0 then
+            local c2, c3 = str:byte(i+1), str:byte(i+2)
+            table.insert(tab,
+                    bit.bor(
+                            bit.lshift(bit.band(c, 0x0F), 12),
+                            bit.lshift(bit.band(c2, 0x3F), 6),
+                            bit.band(c3, 0x3F)
+                    )
+            )
+            i = i + 3
+        else -- 超出BMP直接?
+            table.insert(tab, string.byte("?"))
+            i = i + 4
+        end
+    end
+
+    local buf = ffi.new("wchar_t[?]", #tab + 1) -- 多留一个\0结尾更安全（WriteConsoleW不要求）
+    for j=1,#tab do buf[j-1]=tab[j] end
+
+    return buf, #tab   -- 返回buffer和字符数！
+end
+
+local function win_console_printer(lvl_colors_map)
+    local STD_OUTPUT_HANDLE = -11
+    local handle = ffi.C.GetStdHandle(STD_OUTPUT_HANDLE)
+    return function(lvl,msg)
+        local color_name = r_levels[lvl]
+        local color_value = lvl_colors_map[color_name] or colors.RESET
+        ffi.C.SetConsoleTextAttribute(handle, color_value)
+        local u16buf, u16len = utf8_to_utf16_buf(msg)
+        ffi.C.WriteConsoleW(handle, u16buf, u16len, nil, nil)
+        ffi.C.SetConsoleTextAttribute(handle, colors.RESET) -- 恢复原色
+    end
+end
 
 -- Table pretty printer
 local function _dump(obj,opt)
@@ -61,7 +131,9 @@ end
 
 local function color_fmt(lvl,msg)
     local r_lvl=r_levels[lvl]
-    return '\27['..(lvl_colors[r_lvl]or"")..'m'..msg..'\27[m'
+    if not lvl_colors[r_lvl] then return msg end
+    local code=lvl_colors[r_lvl]+30 -- ANSI前景色起点为30
+    return '\27['..code..'m'..msg..'\27[0m'
 end
 
 local function log(self,lvl,...)
@@ -146,15 +218,18 @@ end
 
 function _M.console(opts)
     opts  = opts or {}
-    local function printer()
-        io.stdout:setvbuf('no')
-        return function(_,msg) io.stdout:write(msg) end
+    local printer_func
+
+    if IS_WINDOWS and pcall(require,"ffi") then -- Windows下用WinAPI输出带中文彩色日志
+        printer_func = win_console_printer(lvl_colors)
+    else -- Linux/Mac或无ffi时走原始方式
+        printer_func = function(_,msg) io.stdout:setvbuf('no'); io.stdout:write(msg) end
     end
 
     return new{
         level   = opts.level or levels.DEBUG,
-        printer = opts.printer or printer(),
-        color   = opts.color,
+        printer = opts.printer or printer_func,
+        color   = not IS_WINDOWS and opts.color or true,   -- Win下强制彩色，其他跟随参数
         pretty  = opts.pretty,
         formater= opts.formater
     }

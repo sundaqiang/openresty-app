@@ -5,7 +5,7 @@ local conf = require("conf.config")
 local log = require ("extend.logger")
 local logger
 
-local function log_once_by_pid(logger, conf)
+local function log_once_by_pid(l, c)
     local pid_file = "logs/nginx.pid"
     local last_file = "logs/last_nginx.pid"
 
@@ -25,7 +25,7 @@ local function log_once_by_pid(logger, conf)
     if last == pid then return end
 
     -- 打印初始化日志
-    logger.i("OpenResty 启动，配置加载成功", conf)
+    l.i("OpenResty 启动，配置加载成功", c)
 
     -- 写入这次的 PID
     local wf = io.open(last_file, "w")
