@@ -1,6 +1,3 @@
-local template = require("resty.template")
-template.caching(false) -- 开发时关闭缓存
-
 local conf = require("conf.config")
 local log = require ("extend.logger")
 local logger
