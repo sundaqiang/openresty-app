@@ -334,3 +334,24 @@ module lua-resty-route-0.1
   section 21103 22184 license
 
 # END lua-resty-route
+# BEGIN lua-resty-logger
+
+dist lua-resty-logger-0.2.1
+  aliases resty.logger
+  modules lua-resty-logger-0.2.1
+
+module lua-resty-logger-0.2.1
+  aliases resty.logger
+  section 18 5678 lua-utility
+  section 167 269 requirements
+  section 269 3905 usage
+  section 3905 5552 api
+  section 3919 4154 logger([opts])
+  section 4154 4216 logger:set_opts(opts)
+  section 4216 4711 logger:set_globle_opts(opts)
+  section 4711 4768 logger:flush()
+  section 4768 5073 logger:log(params)
+  section 5073 5552 others
+  section 5552 5678 license
+
+# END lua-resty-logger
