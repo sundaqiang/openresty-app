@@ -1,0 +1,183 @@
+=encoding utf-8
+
+
+=head1 Changelog
+
+
+All notable changes to C<lua-resty-validation> will be documented in this file.
+
+
+=head2 [2.7] - 2017-08-25
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added callable group validator, thanks @hishamhm
+
+
+=back
+
+
+=head2 [2.6] - 2017-02-05
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added callable validator
+
+=item *
+
+Added requisite and requisites group validators
+(see also: https://github.com/bungle/lua-resty-validation/issues/3)
+
+
+=back
+
+
+=head2 [2.5] - 2016-09-29
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Support for the official OpenResty package manager (opm).
+
+
+=back
+
+
+=head3 Changed
+
+
+=over
+
+
+=item *
+
+Changed the change log format to keep-a-changelog.
+
+
+=back
+
+
+=head2 [2.4] - 2016-09-16
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added support for custom (inline) validators.
+
+=item *
+
+Added resty.validation.injection extension (uses libinjection).
+
+
+=back
+
+
+=head2 [2.3] - 2016-03-22
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+Added resty.validation.utf8 extension (uses utf8rewind).
+
+
+=back
+
+
+=head2 [2.2] - 2015-11-27
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+There was a typo in a code that leaked a global variable in fields:__call method.
+
+
+=back
+
+
+=head2 [2.1] - 2015-10-10
+
+
+=head3 Fixed
+
+
+=over
+
+
+=item *
+
+Fixed leaking global new function.
+
+
+=back
+
+
+=head2 [2.1] - 2015-10-10
+
+
+=head3 Changed
+
+
+=over
+
+
+=item *
+
+Total rewrite.
+
+
+=back
+
+
+=head2 [1.0] - 2014-08-28
+
+
+=head3 Added
+
+
+=over
+
+
+=item *
+
+LuaRocks support via MoonRocks.
+
+=back
+

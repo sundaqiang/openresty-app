@@ -1,3 +1,4 @@
+local logger = require("utils.logger")
 local conf = require("utils.config")
 
 local _M = {}

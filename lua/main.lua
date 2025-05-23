@@ -1,5 +1,3 @@
-local logger = require("utils.logger")
-local conf = require("utils.config")
 local route = require("resty.route").new()
 
 local deps = {}

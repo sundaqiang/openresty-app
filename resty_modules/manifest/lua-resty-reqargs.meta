@@ -1,0 +1,12 @@
+account = bungle
+name = lua-resty-reqargs
+abstract = HTTP Request Arguments and File Uploads Helper
+author = Aapo Talvensaari (@bungle)
+is_original = yes
+license = 2bsd
+repo_link = https://github.com/bungle/lua-resty-reqargs
+lib_dir = lib
+doc_dir = lib
+version = 1.4
+main_module = lib/resty/reqargs.lua
+requires = openresty, openresty/lua-resty-upload

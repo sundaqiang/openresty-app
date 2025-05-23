@@ -389,3 +389,193 @@ module lua-fs-module-0.1
   section 1670 1792 license
 
 # END lua-fs-module
+# BEGIN lua-resty-validation
+
+dist lua-resty-validation-2.7
+  aliases resty.validation
+  modules changes lua-resty-validation-2.7
+
+module changes
+  section 18 1443 changelog
+  section 147 266 added
+  section 266 487 added
+  section 487 587 added
+  section 587 710 changed
+  section 710 900 added
+  section 900 1027 added
+  section 1027 1179 fixed
+  section 1179 1284 fixed
+  section 1284 1371 changed
+  section 1371 1443 added
+
+module lua-resty-validation-2.7
+  aliases resty.validation
+  section 18 32767 lua-resty-validation
+  section 156 2698 hello world with lua-resty-validation
+  section 2698 3386 installation
+  section 3102 3194 using openresty package manager (opm)
+  section 3194 3386 using luarocks
+  section 3386 22211 built-in validators and filters
+  section 3555 5105 validators and filters without arguments
+  section 4686 5105 example
+  section 5105 10779 validation factory validators and filters
+  section 9420 10779 conditional validation factory validators
+  section 10779 13397 group validators
+  section 13397 14408 stop validators
+  section 14408 14937 filtering value and setting the value to nil
+  section 14937 15674 custom (inline) validators and filters
+  section 15674 22211 built-in validator extensions
+  section 16194 16957 resty.validation.ngx extension
+  section 16957 17220 example
+  section 17220 18032 resty.validation.tz extension
+  section 18032 18264 example
+  section 18264 20951 resty.validation.utf8 extension
+  section 20951 21131 example
+  section 21131 21957 resty.validation.injection extension
+  section 21957 22211 example
+  section 22211 31090 api
+  section 22401 22558 validation._version
+  section 22558 25524 boolean, value/error validation...
+  section 25524 29905 table validation.new([table of validators])
+  section 29905 30133 field:accept(value)
+  section 30133 30340 field:reject(error)
+  section 30340 31090 string field:state(invalid, valid, unvalidated)
+  section 31090 31258 changes
+  section 31258 31683 see also
+  section 31683 32767 license
+
+# END lua-resty-validation
+# BEGIN lua-resty-upload
+
+dist lua-resty-upload-0.10
+  aliases resty.upload
+  modules lua-resty-upload-0.10
+
+module lua-resty-upload-0.10
+  aliases resty.upload
+  section 18 130 name
+  section 130 192 status
+  section 192 1383 description
+  section 1383 5602 synopsis
+  section 5602 5700 author
+  section 5700 7194 copyright and license
+  section 7194 7644 see also
+
+# END lua-resty-upload
+# BEGIN lua-resty-reqargs
+
+dist lua-resty-reqargs-1.4
+  aliases resty.reqargs
+  modules changes lua-resty-reqargs-1.4
+
+module changes
+  section 18 1089 changelog
+  section 144 332 fixed
+  section 332 531 added
+  section 531 753 added
+  section 753 893 fixed
+  section 893 1032 fixed
+  section 1032 1089 added
+
+module lua-resty-reqargs-1.4
+  aliases resty.reqargs
+  section 18 5248 lua-resty-reqargs
+  section 171 330 synopsis
+  section 330 889 installation
+  section 617 706 using openresty package manager (opm)
+  section 706 889 using luarocks
+  section 889 3109 api
+  section 1027 3109 get, post, files regargs(options)
+  section 3109 4002 nginx configuration variables
+  section 4002 4167 changes
+  section 4167 5248 license
+
+# END lua-resty-reqargs
+# BEGIN lua-resty-redis
+
+dist lua-resty-redis-0.32
+  aliases resty.redis
+  modules lua-resty-redis-0.32
+
+module lua-resty-redis-0.32
+  aliases resty.redis
+  section 18 117 name
+  section 117 179 status
+  section 179 590 description
+  section 590 4092 synopsis
+  section 4092 16768 methods
+  section 6239 6385 new
+  section 6385 10027 connect
+  section 10027 10289 set_timeout
+  section 10289 10702 set_timeouts
+  section 10702 11418 set_keepalive
+  section 11418 11997 get_reused_times
+  section 11997 12214 close
+  section 12214 12873 init_pipeline
+  section 12873 13272 commit_pipeline
+  section 13272 13578 cancel_pipeline
+  section 13578 13957 hmset
+  section 13957 14167 array_to_hash
+  section 14167 15845 read_reply
+  section 15845 16768 add_commands
+  section 16768 17829 redis authentication
+  section 17829 19183 redis transactions
+  section 19183 20109 redis module
+  section 20109 20696 load balancing and failover
+  section 20696 21088 debugging
+  section 21088 21635 automatic error logging
+  section 21635 24122 check list for issues
+  section 24122 25009 limitations
+  section 25009 25505 installation - build from source
+  section 25505 26263 installation notes
+  section 26263 26279 todo
+  section 26279 26566 community
+  section 26300 26436 english mailing list
+  section 26436 26566 chinese mailing list
+  section 26566 26815 bugs and patches
+  section 26815 26913 author
+  section 26913 28395 copyright and license
+  section 28395 28773 see also
+
+# END lua-resty-redis
+# BEGIN lua-resty-mysql
+
+dist lua-resty-mysql-0.27
+  aliases resty.mysql
+  modules lua-resty-mysql-0.27
+
+module lua-resty-mysql-0.27
+  aliases resty.mysql
+  section 18 113 name
+  section 113 175 status
+  section 175 746 description
+  section 746 5152 synopsis
+  section 5152 15198 methods
+  section 5171 5327 new
+  section 5327 10240 connect
+  section 10240 10393 set_timeout
+  section 10393 11116 set_keepalive
+  section 11116 11694 get_reused_times
+  section 11694 11910 close
+  section 11910 12251 send_query
+  section 12251 14230 read_result
+  section 14230 14652 query
+  section 14652 14886 server_ver
+  section 14886 15198 set_compact_arrays
+  section 15198 15665 sql literal quoting
+  section 15665 17628 multi-resultset support
+  section 17628 18041 debugging
+  section 18041 18571 automatic error logging
+  section 18571 19363 limitations
+  section 19363 20117 more authentication method support
+  section 20117 20873 installation
+  section 20873 21160 community
+  section 20894 21030 english mailing list
+  section 21030 21160 chinese mailing list
+  section 21160 21477 bugs and patches
+  section 21477 21746 todo
+  section 21746 21844 author
+  section 21844 23338 copyright and license
+  section 23338 23826 see also
+
+# END lua-resty-mysql

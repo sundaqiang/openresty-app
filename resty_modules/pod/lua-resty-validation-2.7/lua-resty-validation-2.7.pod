@@ -1,0 +1,1550 @@
+=encoding utf-8
+
+
+=head1 lua-resty-validation
+
+
+B<lua-resty-validation> is an extendable chaining validation and filtering library for Lua and OpenResty.
+
+
+=head2 Hello World with lua-resty-validation
+
+
+
+    local validation = require "resty.validation"
+    
+    local valid, e = validation.number:between(0, 9)(5)  -- valid = true,  e = 5
+    local valid, e = validation.number:between(0, 9)(50) -- valid = false, e = "between"
+    
+    -- Validators can be reused
+    local smallnumber = validation.number:between(0, 9)
+    local valid, e = smallnumber(5)  -- valid = true,  e = 5
+    local valid, e = smallnumber(50) -- valid = false, e = "between"
+    
+    -- Validators can do filtering (i.e. modify the value being validated)
+    -- valid = true, s = "HELLO WORLD!"
+    local valid, s = validation.string.upper "hello world!"
+    
+    -- You may extend the validation library with your own validators and filters...
+    validation.validators.capitalize = function(value) 
+        return true, value:gsub("^%l", string.upper)
+    end
+    
+    -- ... and then use it
+    local valid, e = validation.capitalize "abc" -- valid = true,  e = "Abc"
+    
+    -- You can also group validate many values
+    local group = validation.new{
+        artist = validation.string:minlen(5),
+        number = validation.tonumber:equal(10)
+    }
+    
+    local valid, fields, errors = group{ artist = "Eddie Vedder", number = "10" }
+    
+    if valid then
+      print("all the group fields are valid")
+    else
+      print(fields.artist.name,      fields.artist.error,
+            fields.artist.valid,     fields.artist.invalid,
+            fields.artist.input,     fields.artist.value, ,
+            fields.artist.validated, fields.artist.unvalidated)
+    end
+    
+    -- You can even call fields to get simple name, value table
+    -- (in that case all the `nil`s are removed as well)
+    
+    -- By default this returns only the valid fields' names and values:
+    local data = fields()
+    local data = fields "valid"
+    
+    -- To get only the invalid fields' names and values call:
+    local data = fields "invalid"
+    
+    -- To get only the validated fields' names and values call (whether or not they are valid):
+    local data = fields "validated"
+    
+    -- To get only the unvalidated fields' names and values call (whether or not they are valid):
+    local data = fields "unvalidated"
+    
+    -- To get all, call:
+    local data = fields "all"
+    
+    -- Or combine:
+    local data = fields("valid", "invalid")
+    
+    -- This doesn't stop here. You may also want to get only some fields by their name.
+    -- You can do that by calling (returns a table):
+    local data = data{ "artist" }
+
+
+=head2 Installation
+
+
+Just place L<`validation.lua`|https://github.com/bungle/lua-resty-validation/blob/master/lib/resty/validation.lua> and L<`validation`|https://github.com/bungle/lua-resty-template/tree/master/lib/resty/validation> directory somewhere in your C<package.path>, under C<resty> directory. If you are using OpenResty, the default location would be C</usr/local/openresty/lualib/resty>.
+
+
+=head3 Using OpenResty Package Manager (opm)
+
+
+
+    $ opm get bungle/lua-resty-validation
+
+
+=head3 Using LuaRocks
+
+
+
+    $ luarocks install lua-resty-validation
+
+LuaRocks repository for C<lua-resty-validation> is located at https://luarocks.org/modules/bungle/lua-resty-validation.
+
+
+=head2 Built-in Validators and Filters
+
+
+C<lua-resty-validation> comes with several built-in validators, and the project is open for contributions of more validators.
+
+
+=head3 Validators and Filters without Arguments
+
+
+Type validators can be used to validate the type of the validated value. These validators are argument-less
+validators (call them with dot C<.>):
+
+
+=over
+
+
+=item *
+
+C<null> or C<["nil"]> (as the nil is a reserved keyword in Lua)
+
+=item *
+
+C<boolean>
+
+=item *
+
+C<number>
+
+=item *
+
+C<string>
+
+=item *
+
+C<table>
+
+=item *
+
+C<userdata>
+
+=item *
+
+C<func> or C<["function"]> (as the function is a reserved keyword in Lua)
+
+=item *
+
+C<callable> (either a function or a table with metamethod C<__call>)
+
+=item *
+
+C<thread>
+
+=item *
+
+C<integer>
+
+=item *
+
+C<float>
+
+=item *
+
+C<file> (C<io.type(value) == 'file'>)
+
+
+=back
+
+Type conversion filters:
+
+
+=over
+
+
+=item *
+
+C<tostring>
+
+=item *
+
+C<tonumber>
+
+=item *
+
+C<tointeger>
+
+=item *
+
+C<toboolean>
+
+
+=back
+
+Other filters:
+
+
+=over
+
+
+=item *
+
+C<tonil> or C<tonull>
+
+=item *
+
+C<abs>
+
+=item *
+
+C<inf>
+
+=item *
+
+C<nan>
+
+=item *
+
+C<finite>
+
+=item *
+
+C<positive>
+
+=item *
+
+C<negative>
+
+=item *
+
+C<lower>
+
+=item *
+
+C<upper>
+
+=item *
+
+C<trim>
+
+=item *
+
+C<ltrim>
+
+=item *
+
+C<rtrim>
+
+=item *
+
+C<reverse>
+
+=item *
+
+C<email>
+
+=item *
+
+C<optional>
+
+
+=back
+
+
+=head4 Example
+
+
+
+    local validation = require "resty.validation"
+    local ok, e = validation.null(nil)
+    local ok, e = validation.boolean(true)
+    local ok, e = validation.number(5.2)
+    local ok, e = validation.string('Hello, World!')
+    local ok, e = validation.integer(10)
+    local ok, e = validation.float(math.pi)
+    local f = assert(io.open('filename.txt', "r"))
+    local ok, e = validation.file(f)
+
+
+=head3 Validation Factory Validators and Filters
+
+
+Validation factory consist of different validators and filters used to validate or filter the value
+(call them with colon C<:>):
+
+
+=over
+
+
+=item *
+
+C<type(t)>, validates that the value is of type C<t> (see Type Validators)
+
+=item *
+
+C<nil()> or C<["null"]()>, check that value type is C<nil>
+
+=item *
+
+C<boolean()>, check that value type is C<boolean>
+
+=item *
+
+C<number()>, check that value type is C<number>
+
+=item *
+
+C<string()>, check that value type is C<string>
+
+=item *
+
+C<table()>, check that value type is C<table>
+
+=item *
+
+C<userdata()>, check that value type is C<userdata>
+
+=item *
+
+C<func()> or C<["function"]()>, check that value type is C<function>
+
+=item *
+
+C<callable()>, check that value is callable (aka a function or a table with metamethod C<__call>)
+
+=item *
+
+C<thread()>, check that value type is C<thread>
+
+=item *
+
+C<integer()>, check that value type is C<integer>
+
+=item *
+
+C<float()>, check that value type is C<float>
+
+=item *
+
+C<file()>, check that value type is C<file> (C<io.type(value) == 'file'>)
+
+=item *
+
+C<abs()>, filters value and returns absolute value (C<math.abs>)
+
+=item *
+
+C<inf()>, checks that the value is C<inf> or C<-inf>
+
+=item *
+
+C<nan()>, checks that the value is C<nan>
+
+=item *
+
+C<finite()>, checks that the value is not C<nan>, C<inf> or C<-inf>
+
+=item *
+
+C<positive()>, validates that the value is positive (C<< > 0 >>)
+
+=item *
+
+C<negative()>, validates that the value is negative (C<< < 0 >>)
+
+=item *
+
+C<min(min)>, validates that the value is at least C<min> (C<< >= >>)
+
+=item *
+
+C<max(max)>, validates that the value is at most C<max> (C<< <= >>)
+
+=item *
+
+C<between(min[, max = min])>, validates that the value is between C<min> and C<max>
+
+=item *
+
+C<outside(min[, max = min])>, validates that the value is not between C<min> and C<max>
+
+=item *
+
+C<divisible(number)>, validates that the value is divisible with C<number>
+
+=item *
+
+C<indivisible(number)>, validates that the value is not divisible with C<number>
+
+=item *
+
+C<len(min[, max = min])>, validates that the length of the value is exactly C<min> or between C<min> and C<max>  (UTF-8)
+
+=item *
+
+C<minlen(min)>, validates that the length of the value is at least C<min> (UTF-8)
+
+=item *
+
+C<maxlen(max)>, validates that the length of the value is at most C<max>  (UTF-8)
+
+=item *
+
+C<equals(equal)> or C<equal(equal)>, validates that the value is exactly something
+
+=item *
+
+C<unequals(equal)> or C<unequal(equal)>, validates that the value is not exactly something
+
+=item *
+
+C<oneof(...)>, validates that the value is equal to one of the supplied arguments
+
+=item *
+
+C<noneof(...)>, validates that the value is not equal to any of the supplied arguments
+
+=item *
+
+C<match(pattern[, init])>, validates that the value matches (C<string.match>) the pattern
+
+=item *
+
+C<unmatch(pattern[, init])>, validates that the value does not match (C<string.match>) the pattern
+
+=item *
+
+C<tostring()>, converts value to string
+
+=item *
+
+C<tonumber([base])>, converts value to number
+
+=item *
+
+C<tointeger()>, converts value to integer
+
+=item *
+
+C<toboolean()>, converts value to boolean (using C<not not value>)
+
+=item *
+
+C<tonil()> or C<tonull()>, converts value to nil
+
+=item *
+
+C<lower()>, converts value to lower case (UTF-8 support is not yet implemented)
+
+=item *
+
+C<upper()>, converts value to upper case (UTF-8 support is not yet implemented)
+
+=item *
+
+C<trim([pattern])>, trims whitespace (you may use pattern as well) from the left and the right
+
+=item *
+
+C<ltrim([pattern])>, trims whitespace (you may use pattern as well) from the left
+
+=item *
+
+C<rtrim([pattern])>, trims whitespace (you may use pattern as well) from the right
+
+=item *
+
+C<starts(starts)>, checks if string starts with C<starts>
+
+=item *
+
+C<ends(ends)>, checks if string ends with C<ends>
+
+=item *
+
+C<reverse>, reverses the value (string or number) (UTF-8)
+
+=item *
+
+C<coalesce(...)>, if the value is nil, returns first non-nil value passed as arguments
+
+=item *
+
+C<email()>, validates that the value is email address
+
+=item *
+
+C<call(function)>, validates / filters the value against custom inline validator / filter
+
+=item *
+
+C<optional([default])>, stops validation if the value is empty string C<""> or C<nil> and returns C<true>, and either, C<default> or C<value>
+
+
+=back
+
+
+=head4 Conditional Validation Factory Validators
+
+
+For all the Validation Factory Validators there is a conditional version that always validates to true,
+but where you can replace the actual value depending whether the original validator validated. Hey, this
+is easier to show than say:
+
+
+    local validation = require "resty.validation"
+    
+    -- ok == true, value == "Yes, the value is nil"
+    local ok, value = validation:ifnil(
+        "Yes, the value is nil",
+        "No, you did not supply a nil value")(nil)
+    
+    -- ok == true, value == "No, you did not supply a nil value"
+    local ok, value = validation:ifnil(
+        "Yes, the value is nil",
+        "No, you did not supply a nil value")("non nil")
+        
+    -- ok == true, value == "Yes, the number is betweeb 1 and 10"    
+    local ok, value = validation:ifbetween(1, 10,
+        "Yes, the number is between 1 and 10",
+        "No, the number is not between 1 and 10")(5)
+    
+    -- ok == true, value == "No, the number is not between 1 and 10"
+    local ok, value = validation:ifbetween(1, 10,
+        "Yes, the number is between 1 and 10",
+        "No, the number is not between 1 and 10")(100)
+
+The last 2 arguments to conditional validation factory validators are the C<truthy> and C<falsy> values.
+Every other argument is passed to the actual validation factory validator.
+
+
+=head3 Group Validators
+
+
+C<lua-resty-validation> currently supports a few predefined validators:
+
+
+=over
+
+
+=item *
+
+C<compare(comparison)>, compares two fields and sets fields invalid or valid according to comparison
+
+=item *
+
+C<requisite{ fields }>, at least of of the requisite fields is required, even if they by themselves are optional
+
+=item *
+
+C<requisites({ fields }, number)>, at least C<number> of requisites fields are required (by default all of them)
+
+=item *
+
+C<call(function)>, calls a custom (or inline) group validation function
+
+
+=back
+
+
+    local ispassword = validation.trim:minlen(8)
+    local group = validation.new{
+        password1 = ispassword,
+        password2 = ispassword
+    }
+    group:compare "password1 == password2"
+    local valid, fields, errors = group{ password1 = "qwerty123", password2 = "qwerty123" }
+    
+    local optional = validation:optional"".trim
+    local group = validation.new{
+        text = optional,
+        html = optional
+    }
+    group:requisite{ "text", "html" }
+    local valid, fields, errors = group{ text = "", html = "" }
+    
+    
+    local optional = validation:optional ""
+    local group = validation.new{
+        text = optional,
+        html = optional
+    }
+    group:requisites({ "text", "html" }, 2)
+    -- or group:requisites{ "text", "html" }
+    local valid, fields, errors = group{ text = "", html = "" }
+    
+    
+    group:call(function(fields)
+        if fields.text.value == "hello" then
+            fields.text:reject "text cannot be 'hello'"
+            fields.html:reject "because text was 'hello', this field is also invalidated"
+        end
+    end)
+
+You can use normal Lua relational operators in C<compare> group validator:
+
+
+=over
+
+
+=item *
+
+C<< < >>
+
+=item *
+
+C<< > >>
+
+=item *
+
+C<< <= >>
+
+=item *
+
+C<< >= >>
+
+=item *
+
+C<==>
+
+=item *
+
+C<~=>
+
+
+=back
+
+C<requisite> and C<requisites> check if the field value is C<nil> or C<"">(empty string).
+With C<requisite>, if all the specified fields are C<nil> or C<""> then all the fields are
+invalid (provided they were not by themselves invalid), and if at least one of the fields
+is valid then all the fields are valid. C<requisites> works the same, but there you can
+define the number of how many fields you want to have a value that is not C<nil> and not
+an empty string C<"">. These provide conditional validation in sense of:
+
+
+=over
+
+
+=item 1.
+
+I have (two or more) fields
+
+=item 2.
+
+All of them are optional
+
+=item 3.
+
+At least one / defined number of fields should be filled but I don't care which one as long as there is at least one / defined number of fields filled
+
+
+=back
+
+
+=head3 Stop Validators
+
+
+Stop validators, like C<optional>, are just like a normal validators, but instead of returning
+C<true> or C<false> as a validation result OR as a filtered value, you can return C<validation.stop>.
+This value can also be used inside conditional validators and in validators that support default values. Here is how
+the C<optional> validator is implemented:
+
+
+    function factory.optional(default)
+        return function(value)
+            if value == nil or value == "" then
+                return validation.stop, default ~= nil and default or value
+            end
+            return true, value
+        end
+    end
+
+These are roughly equivalent:
+
+
+    -- Both return: true, "default" (they stop prosessing :minlen(10) on nil and "" inputs
+    local input = ""
+    local ok, val = validation.optional:minlen(10)(input)
+    local ok, val = validation:optional(input):minlen(10)(input)
+    local ok, val = validation:ifoneof("", nil, validation.stop(input), input):minlen(10)(input)
+
+
+=head3 Filtering Value and Setting the Value to C<nil>
+
+
+Most of the validators, that are not filtering the value, only return C<true> or C<false> as a result.
+That means that there is now no way to signal C<resty.validation> to actually set the value to C<nil>.
+So there is a work-around, you can return C<validation.nothing> as a value, and that will change the
+value to C<nil>, e.g. the built-in C<tonil> validator is actually implemented like this (pseudo):
+
+
+    function()
+        return true, validation.nothing
+    end
+
+
+=head3 Custom (Inline) Validators and Filters
+
+
+Sometimes you may just have one-off validators / filters that you are not using elsewhere, or that you just
+want to supply quickly an additional validator / filter for a specific case. To make that easy and straight
+forward, we introduced C<call> factory method with C<lua-resty-validation> 2.4. Here is an example:
+
+
+    validation:call(function(value)
+        -- now validate / filter the value, and return the results
+        -- here we just return false (aka making validation to fail) 
+        return false
+    end)("Check this value"))
+
+(of course it doesn't need to be inline function as in Lua all functions are first class citizens and they can 
+be passed around as parameters)
+
+
+=head3 Built-in Validator Extensions
+
+
+Currently C<lua-resty-validation> has support for two extensions or plugins that you can enable:
+
+
+=over
+
+
+=item *
+
+C<resty.validation.ngx>
+
+=item *
+
+C<resty.validation.tz>
+
+=item *
+
+C<resty.validation.utf8>
+
+
+=back
+
+These are something you can look at if you want to build your own validator extension. If you do
+so, and think that it would be usable for others as well, mind you to send your extension as a pull-request
+for inclusion in this project, thank you very much, ;-).
+
+
+=head4 resty.validation.ngx extension
+
+
+As the name tells, this set of validator extensions requires OpenResty (or Lua Nginx module at least).
+To use this extension all you need to do is:
+
+
+    require "resty.validation.ngx"
+
+It will monkey patch the adapters that it will provide in C<resty.validation>, and those are currently:
+
+
+=over
+
+
+=item *
+
+C<escapeuri>
+
+=item *
+
+C<unescapeuri>
+
+=item *
+
+C<base64enc>
+
+=item *
+
+C<base64dec>
+
+=item *
+
+C<crc32short>
+
+=item *
+
+C<crc32long>
+
+=item *
+
+C<crc32>
+
+=item *
+
+C<md5>
+
+
+=back
+
+(there is both factory and argument-less version of these)
+
+There is also regex matcher in ngx extension that uses C<ngx.re.match>, and parameterized C<md5>:
+
+
+=over
+
+
+=item *
+
+C<regex(regex[, options])>
+
+=item *
+
+C<md5([bin])>
+
+
+=back
+
+
+=head4 Example
+
+
+
+    require "resty.validation.ngx"
+    local validation = require "resty.validation"
+    local valid, value = validation.unescapeuri.crc32("https://github.com/")
+    local valid, value = validation:unescapeuri():crc32()("https://github.com/")
+
+
+=head4 resty.validation.tz extension
+
+
+This set of validators and filters is based on the great L<`luatz`|https://github.com/daurnimator/luatz>
+library by L<@daurnimator|https://github.com/daurnimator>, that is a library for time and date manipulation. To use this extension, all you need
+to do is:
+
+
+    require "resty.validation.tz"
+
+It will monkey patch the adapters that it will provide in C<resty.validation>, and those are currently:
+
+
+=over
+
+
+=item *
+
+C<totimetable>
+
+=item *
+
+C<totimestamp>
+
+
+=back
+
+(there is both factory and argument-less version of these)
+
+C<totimestamp> and C<totimetable> filters work great with HTML5 date and datetime input fields. As the name
+tells, C<totimetable> returns luatz C<timetable> and C<totimestamp> returns seconds since unix epoch (C<1970-01-01>)
+as a Lua number.
+
+
+=head4 Example
+
+
+
+    require "resty.validation.tz"
+    local validation = require "resty.validation"
+    local valid, ts = validation.totimestamp("1990-12-31T23:59:60Z")
+    local valid, ts = validation.totimestamp("1996-12-19")
+
+
+=head4 resty.validation.utf8 extension
+
+
+This set of validators and filters is based on the great L<`utf8rewind`|https://bitbucket.org/knight666/utf8rewind>
+library by Quinten Lansu - a system library written in C designed to extend the default string handling functions
+with support for UTF-8 encoded text. It needs my LuaJIT FFI wrapper L<`lua-resty-utf8rewind`|https://github.com/bungle/lua-resty-utf8rewind>
+to work. When the mentioned requirements are installed, the rest is easy. To use this extension, all you need
+to do is:
+
+
+    require "resty.validation.utf8"
+
+It will monkey patch the adapters that it will provide in C<resty.validation>, and those are currently:
+
+
+=over
+
+
+=item *
+
+C<utf8upper>
+
+=item *
+
+C<utf8lower>
+
+=item *
+
+C<utf8title>
+
+
+=back
+
+(there is both factory and argument-less version of these)
+
+There is also a few factory validators / filters:
+
+
+=over
+
+
+=item *
+
+C<utf8normalize(form)>
+
+=item *
+
+C<utf8category(category)>
+
+
+=back
+
+The C<utf8normalize> normalizes the UTF-8 input to one of these normalization formats:
+
+
+=over
+
+
+=item *
+
+C<C> (or C<NFC>)
+
+=item *
+
+C<D> (or C<NFD>)
+
+=item *
+
+C<KC> (or C<NFKC>)
+
+=item *
+
+C<KD> (or C<NFKD>)
+
+
+=back
+
+The C<utf8category> checks that the input string is in one of the following categories (so, you may think it has
+multiple validators built-in to work with UTF-8 string validation):
+
+
+=over
+
+
+=item *
+
+C<LETTER_UPPERCASE>
+
+=item *
+
+C<LETTER_LOWERCASE>
+
+=item *
+
+C<LETTER_TITLECASE>
+
+=item *
+
+C<LETTER_MODIFIER>
+
+=item *
+
+C<CASE_MAPPED>
+
+=item *
+
+C<LETTER_OTHER>
+
+=item *
+
+C<LETTER>
+
+=item *
+
+C<MARK_NON_SPACING>
+
+=item *
+
+C<MARK_SPACING>
+
+=item *
+
+C<MARK_ENCLOSING>
+
+=item *
+
+C<MARK>
+
+=item *
+
+C<NUMBER_DECIMAL>
+
+=item *
+
+C<NUMBER_LETTER>
+
+=item *
+
+C<NUMBER_OTHER>
+
+=item *
+
+C<NUMBER>
+
+=item *
+
+C<PUNCTUATION_CONNECTOR>
+
+=item *
+
+C<PUNCTUATION_DASH>
+
+=item *
+
+C<PUNCTUATION_OPEN>
+
+=item *
+
+C<PUNCTUATION_CLOSE>
+
+=item *
+
+C<PUNCTUATION_INITIAL>
+
+=item *
+
+C<PUNCTUATION_FINAL>
+
+=item *
+
+C<PUNCTUATION_OTHER>
+
+=item *
+
+C<PUNCTUATION>
+
+=item *
+
+C<SYMBOL_MATH>
+
+=item *
+
+C<SYMBOL_CURRENCY>
+
+=item *
+
+C<SYMBOL_MODIFIER>
+
+=item *
+
+C<SYMBOL_OTHER>
+
+=item *
+
+C<SYMBOL>
+
+=item *
+
+C<SEPARATOR_SPACE>
+
+=item *
+
+C<SEPARATOR_LINE>
+
+=item *
+
+C<SEPARATOR_PARAGRAPH>
+
+=item *
+
+C<SEPARATOR>
+
+=item *
+
+C<CONTROL>
+
+=item *
+
+C<FORMAT>
+
+=item *
+
+C<SURROGATE>
+
+=item *
+
+C<PRIVATE_USE>
+
+=item *
+
+C<UNASSIGNED>
+
+=item *
+
+C<COMPATIBILITY>
+
+=item *
+
+C<ISUPPER>
+
+=item *
+
+C<ISLOWER>
+
+=item *
+
+C<ISALPHA>
+
+=item *
+
+C<ISDIGIT>
+
+=item *
+
+C<ISALNUM>
+
+=item *
+
+C<ISPUNCT>
+
+=item *
+
+C<ISGRAPH>
+
+=item *
+
+C<ISSPACE>
+
+=item *
+
+C<ISPRINT>
+
+=item *
+
+C<ISCNTRL>
+
+=item *
+
+C<ISXDIGIT>
+
+=item *
+
+C<ISBLANK>
+
+=item *
+
+C<IGNORE_GRAPHEME_CLUSTER>
+
+
+=back
+
+
+=head4 Example
+
+
+
+    require "resty.validation.utf8"
+    local validation = require "resty.validation"
+    local valid, ts = validation:utf8category("LETTER_UPPERCASE")("TEST")
+
+
+=head4 resty.validation.injection extension
+
+
+This set of validators and filters is based on the great L<`libinjection`|https://github.com/client9/libinjection>
+library by Nick Galbreath - a SQL / SQLI / XSS tokenizer parser analyzer. It needs my LuaJIT FFI wrapper
+L<`lua-resty-injection`|https://github.com/bungle/lua-resty-injection> to work. When the mentioned requirements
+are installed, the rest is easy. To use this extension, all you need to do is:
+
+
+    require "resty.validation.injection"
+
+It will monkey patch the adapters that it will provide in C<resty.validation>, and those are currently:
+
+
+=over
+
+
+=item *
+
+C<sqli>, returns C<false> if SQL injection was detected, otherwise returns C<true>
+
+=item *
+
+C<xss>, returns C<false> if Cross-Site Scripting injection was detected, otherwise returns C<true>
+
+
+=back
+
+
+=head4 Example
+
+
+
+    require "resty.validation.injection"
+    local validation = require "resty.validation"
+    local valid, ts = validation.sqli("test'; DELETE FROM users;")
+    local valid, ts = validation.xss("test <script>alert('XSS');</script>")
+
+
+=head2 API
+
+
+I'm not going here for details for all the different validators and filters there is because they all follow the
+same logic, but I will show some general ways how this works.
+
+
+=head3 validation._VERSION
+
+
+This field contains a version of the validation library, e.g. it's value can be C<"2.5"> for
+the version 2.5 of this library.
+
+
+=head3 boolean, value/error validation...
+
+
+That C<...> means the validation chain. This is used to define a single validator chain. There is no limit to
+chain length. It will always return boolean (if the validation is valid or not). The second return value will
+be either the name of the filter that didn't return C<true> as a validation result, or the filtered value.
+
+
+    local v = require "resty.validation"
+    
+    -- The below means, create validator that checks that the input is:
+    -- 1. string
+    -- If, it is, then trim whitespaces from begin and end of the string:
+    -- 2. trim
+    -- Then check that the trimmed string's length is at least 5 characters (UTF-8):
+    -- 3. minlen(5)
+    -- And if everything is still okay, convert that string to upper case
+    -- (UTF-8 is not yet supported in upper):
+    -- 4. upper
+    local myvalidator = v.string.trim:minlen(5).upper
+    
+    -- This example will return false and "minlen"
+    local valid, value = myvalidator(" \n\t a \t\n ")
+    
+    -- This example will return true and "ABCDE"
+    local valid, value = myvalidator(" \n\t abcde \t\n ")
+
+Whenever the validator fails and returns C<false>, you should not use the returned value for other purposes than
+error reporting. So, the chain works like that. The C<lua-resty-validation> will not try to do anything if you
+specify chains that will never get used, such as:
+
+
+    local v = require "resty.validation"
+    -- The input value can never be both string and number at the same time:
+    local myvalidator = v.string.number:max(3)
+    -- But you could write this like this
+    -- (take input as a string, try to convert it to number, and check it is at most 3):
+    local myvalidator = v.string.tonumber:max(3)
+
+As you see, this is a way to define single reusable validators. You can for example predefine your set of basic
+single validator chains and store it in your own module from which you can reuse the same validation logic in
+different parts of your application. It is good idea to start defining single reusable validators, and then reuse
+them in group validators.
+
+E.g. say you have module called C<validators>:
+
+
+    local v = require "resty.validation"
+    return {
+        nick     = v.string.trim:minlen(2),
+        email    = v.string.trim.email,
+        password = v.string.trim:minlen(8)
+    }
+
+And now you have C<register> function somewhere in your application:
+
+
+    local validate = require "validators"
+    local function register(nick, email, password)
+        local vn, nick     = validate.nick(nick)
+        local ve, email    = validate.email(email)
+        local vp, password = validate.password(password)
+        if vn and ve and vp then
+            -- input is valid, do something with nick, email, and password
+        else
+            -- input is invalid, nick, email, and password contain the error reasons
+        end
+    end
+
+This quickly gets a little bit dirty, and that's why we have Group validators.
+
+
+=head3 table validation.new([table of validators])
+
+
+This function is where the group validation kicks in. Say that you have a registration
+form that asks you nick, email (same twice), and password (same twice).
+
+We will reuse the single validators, defined in C<validators> module:
+
+
+    local v = require "resty.validation"
+    return {
+        nick     = v.string.trim:minlen(2),
+        email    = v.string.trim.email,
+        password = v.string.trim:minlen(8)
+    }
+
+Now, lets create the reusable group validator in C<forms> module:
+
+
+    local v        = require "resty.validation"
+    local validate = require "validators"
+    
+    -- First we create single validators for each form field
+    local register = v.new{
+        nick      = validate.nick,
+        email     = validate.email,
+        email2    = validate.email,
+        password  = validate.password,
+        password2 = validate.password
+    }
+    
+    -- Next we create group validators for email and password:
+    register:compare "email    == email2"
+    register:compare "password == password2"
+    
+    -- And finally we return from this forms module
+    
+    return {
+        register = register
+    }
+    
+
+Now, somewhere in your application you have this C<register> function:
+
+
+    local forms = require "forms"
+    local function register(data)
+        local valid, fields, errors = forms.register(data)
+        if valid then
+            -- input is valid, do something with fields
+        else
+            -- input is invalid, do something with fields and errors
+        end
+    end
+    
+    -- And you might call it like:
+    
+    register{
+        nick      = "test",
+        email     = "test@test.org",
+        email2    = "test@test.org",
+        password  = "qwerty123",
+        password2 = "qwerty123"
+    }
+    
+
+The great thing about group validators is that you can JSON encode the fields and errors
+table and return it to client. This might come handy when building a single page application
+and you need to report server side errors on client. In the above example, the C<fields>
+variable will look like this (C<valid> would be true:, and C<errors> would be C<nil>):
+
+
+    {
+        nick = {
+            unvalidated = false,
+            value = "test",
+            input = "test",
+            name = "nick",
+            valid = true,
+            invalid = false,
+            validated = true
+        },
+        email = {
+            unvalidated = false,
+            value = "test@test.org",
+            input = "test@test.org",
+            name = "email",
+            valid = true,
+            invalid = false,
+            validated = true
+        },
+        email2 = {
+            unvalidated = false,
+            value = "test@test.org",
+            input = "test@test.org",
+            name = "email2",
+            valid = true,
+            invalid = false,
+            validated = true
+        },
+        password = {
+            unvalidated = false,
+            value = "qwerty123",
+            input = "qwerty123",
+            name = "password",
+            valid = true,
+            invalid = false,
+            validated = true
+        },
+        password2 = {
+            unvalidated = false,
+            value = "qwerty123",
+            input = "qwerty123",
+            name = "password2",
+            valid = true,
+            invalid = false,
+            validated = true
+        }
+    }
+
+This is great for further processing and sending the fields as JSON encoded back
+to the client-side Javascript application, but usually this is too heavy construct
+to be send to the backend layer. To get a simple key value table, we can call this
+fields table:
+
+
+    local data = fields()
+
+The C<data> variable will now contain:
+
+
+    {
+        nick = "test",
+        email = "test@test.org",
+        email2 = "test@test.org",
+        password = "qwerty123",
+        password2 = "qwerty123"
+    }
+
+Now this is something you can send for example in Redis or whatever database (abstraction) layer
+you have. But, well, this doesn't stop here, if say your database layer is only interested in
+C<nick>, C<email> and C<password> (e.g. strip those duplicates), you can even call the C<data> table:
+
+
+    local realdata = data("nick", "email", "password")
+
+The C<realdata> will now contain:
+
+
+    {
+        nick = "test",
+        email = "test@test.org",
+        password = "qwerty123"
+    }
+
+
+=head3 field:accept(value)
+
+
+For field you can call C<accept> that does this:
+
+
+    self.error = nil
+    self.value = value
+    self.valid = true
+    self.invalid = false
+    self.validated = true
+    self.unvalidated = false
+
+
+=head3 field:reject(error)
+
+
+For field you can call C<reject> that does this:
+
+
+    self.error = error
+    self.valid = false
+    self.invalid = true
+    self.validated = true
+    self.unvalidated = false
+
+
+=head3 string field:state(invalid, valid, unvalidated)
+
+
+Calling C<state> on field is great when embedding validation results inside say HTML template, such as C<lua-resty-template>. Here is an example using C<lua-resty-template>:
+
+
+    <form method="post">
+        <input class="{{ form.email:state('invalid', 'valid') }}"
+                name="email"
+                type="text"
+                placeholder="Email"
+                value="{{ form.email.input }}">
+        <button type="submit">Join</button>
+    </form>
+
+So depending on email field's state this will add a class to input element (e.g. making input's border red or green for example). We don't care about unvalidated (e.g. when the user first loaded the page and form) state here.
+
+
+=head2 Changes
+
+
+The changes of every release of this module is recorded in L<Changes.md|https://github.com/bungle/lua-resty-validation/blob/master/Changes.md> file.
+
+
+=head2 See Also
+
+
+
+=over
+
+
+=item *
+
+L<lua-resty-route|https://github.com/bungle/lua-resty-route> — Routing library
+
+=item *
+
+L<lua-resty-reqargs|https://github.com/bungle/lua-resty-reqargs> — Request arguments parser
+
+=item *
+
+L<lua-resty-session|https://github.com/bungle/lua-resty-session> — Session library
+
+=item *
+
+L<lua-resty-template|https://github.com/bungle/lua-resty-template> — Templating Engine
+
+
+=back
+
+
+=head2 License
+
+
+C<lua-resty-validation> uses two clause BSD license.
+
+
+    Copyright (c) 2014 - 2017, Aapo Talvensaari
+    All rights reserved.
+    
+    Redistribution and use in source and binary forms, with or without modification,
+    are permitted provided that the following conditions are met:
+    
+    * Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+    
+    * Redistributions in binary form must reproduce the above copyright notice, this
+      list of conditions and the following disclaimer in the documentation and/or
+      other materials provided with the distribution.
+    
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+    ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES`

@@ -1,0 +1,157 @@
+=encoding utf-8
+
+
+=head1 lua-resty-reqargs
+
+
+Helper to Retrieve C<application/x-www-form-urlencoded>, C<multipart/form-data>, and C<application/json> Request Arguments.
+
+
+=head2 Synopsis
+
+
+
+    local get, post, files = require "resty.reqargs"()
+    if not get then
+        error(post)
+    end
+    -- Use get, post, and files...
+
+
+=head2 Installation
+
+
+Just place L<`reqargs.lua`|https://github.com/bungle/lua-resty-reqargs/blob/master/lib/resty/reqargs.lua>
+somewhere in your C<package.path>, under C<resty> directory. If you are using OpenResty, the default location
+would be C</usr/local/openresty/lualib/resty>.
+
+
+=head3 Using OpenResty Package Manager (opm)
+
+
+
+    $ opm get bungle/lua-resty-reqargs
+
+
+=head3 Using LuaRocks
+
+
+
+    $ luarocks install lua-resty-reqargs
+
+LuaRocks repository for C<lua-resty-reqargs> is located at https://luarocks.org/modules/bungle/lua-resty-reqargs.
+
+
+=head2 API
+
+
+This module has only one function, and that function is loaded with require:
+
+
+    local reqargs = require "resty.reqargs"
+
+
+=head3 get, post, files regargs(options)
+
+
+When you call the function (C<reqargs>) you can pass it C<options>. These
+options override whatever you may have defined in your Nginx configuration
+(or the defaults). You may use the following options:
+
+
+    {
+        tmp_dir          = "/tmp",
+        timeout          = 1000,
+        chunk_size       = 4096,
+        max_get_args     = 100,
+        mas_post_args    = 100,
+        max_line_size    = 512,
+        max_file_uploads = 10
+    }
+
+This function will return three (3) return values, and they are called
+C<get>, C<post>,  and C<files>. These are Lua tables containing the data
+that was (HTTP) requested. C<get> contains HTTP request GET arguments
+retrieved with L<ngx.req.get_uri_args|https://github.com/openresty/lua-nginx-module#ngxreqget_uri_args>.
+C<post> contains either HTTP request POST arguments retrieved with
+L<ngx.req.get_post_args|https://github.com/openresty/lua-nginx-module#ngxreqget_post_args>,
+or in case of C<application/json> (as a content type header for the request),
+it will read the request body and decode the JSON, and the C<post> will
+then contain the decoded JSON structure presented as Lua tables. The
+last return value C<files> contains all the files uploaded. The C<files>
+return value will only contain data when there are actually files uploaded
+and that the request content type is set to C<multipart/form-data>. C<files>
+has the same structure as C<get> and C<post> for the keys, but the values
+are presented as a Lua tables, that look like this (think about PHP's C<$_FILES>):
+
+
+    {
+        -- The name of the file upload form field (same as the key)
+        name = "photo",
+        -- The name of the file that the user selected for the upload
+        file = "cat.jpg",
+        -- The mimetype of the uploaded file
+        type = "image/jpeg"
+        -- The file size of the uploaded file (in bytes)
+        size = 123465
+        -- The location where the uploaded file was streamed
+        temp = "/tmp/????"
+    }
+
+In case of error, this function will return C<nil>, C<error message>.
+
+
+=head2 Nginx Configuration Variables
+
+
+You can configure several aspects of C<lua-resty-reqargs> directly from
+the Nginx configuration, here are the configuration values that you may
+use, and their default values:
+
+
+    # the default is the system temp dir
+    set $reqargs_tmp_dir           /tmp;
+    # see https://github.com/openresty/lua-resty-upload
+    set $reqargs_timeout           1000;
+    # see https://github.com/openresty/lua-resty-upload
+    set $reqargs_chunk_size        4096;
+    # see https://github.com/openresty/lua-nginx-module#ngxreqget_uri_args
+    set $reqargs_max_get_args      100;
+    # see https://github.com/openresty/lua-nginx-module#ngxreqget_post_args
+    set $reqargs_max_post_args     100;
+    # see https://github.com/openresty/lua-resty-upload
+    set $reqargs_max_line_size     512;  
+    # the default is unlimited
+    set $reqargs_max_file_uploads  10;
+
+
+=head2 Changes
+
+
+The changes of every release of this module is recorded in L<Changes.md|https://github.com/bungle/lua-resty-reqargs/blob/master/Changes.md> file.
+
+
+=head2 License
+
+
+C<lua-resty-reqargs> uses two clause BSD license.
+
+
+    Copyright (c) 2015 - 2017, Aapo Talvensaari
+    All rights reserved.
+    
+    Redistribution and use in source and binary forms, with or without modification,
+    are permitted provided that the following conditions are met:
+    
+    * Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+    
+    * Redistributions in binary form must reproduce the above copyright notice, this
+      list of conditions and the following disclaimer in the documentation and/or
+      other materials provided with the distribution.
+    
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+    ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES`
