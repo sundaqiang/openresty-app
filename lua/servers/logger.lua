@@ -1,6 +1,6 @@
 local cjson = require("cjson")
 local Logger = require("resty.logger")
-local conf = require("utils.config")
+local conf = require("servers.config")
 
 local function find_caller(index)
     if index > 0 then

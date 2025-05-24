@@ -1,15 +1,18 @@
-local conf = require("utils.config")
+local conf = require("servers.config")
 local route = require("resty.route").new()
 
 local svcs = {
-    c = conf,
-    l = require("utils.logger")
+    -- 注入配置和日志
+    conf = conf,
+    log = require("servers.logger")
 }
 
 local middleware = require("middleware.main").new(svcs)
 
+-- 引入中间件
 middleware:add_middlewares_to(route)
 
+-- 路由
 route:get("=/", require("controllers.home").index)
 
 return route
