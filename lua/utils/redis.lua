@@ -1,41 +1,44 @@
 local redis = require "resty.redis"
 
 return function(self)
-    return function(options)
-        local route = self.route
-        local r, e = redis:new()
-        if not r then
-            return route:error(e)
+    local route = self.route
+
+    local option = self.svcs.c.redis
+    if not (option.name and option.host) then
+        self.yield()
+    else
+        local rdb, err = redis:new()
+        if not rdb then
+            return route:fail(err, 503)
         end
 
-        local o, e = r:connect(options.host or "127.0.0.1", options.port or 6379)
-
-        if not o then
-            return route:error(e)
+        local ok, err = rdb:connect(option.host or "127.0.0.1", option.port or 6379)
+        if not ok then
+            return route:fail(err, 503)
         end
 
-        if options.timeout then
-            r:set_timeout(options.timeout)
+        if option.timeout then
+            rdb:set_timeout(option.timeout)
         end
 
-        if options.password then
-            local ok, err = r:auth(options.password)
-            if not ok then return route:error(err) end
+        if option.password then
+            ok, err = rdb:auth(option.password)
+            if not ok then return route:fail(err, 503) end
         end
 
-        if options.database then
-            local ok, err = r:select(options.database)
-            if not ok then return route:error(err) end
+        if option.database then
+            ok, err = rdb:select(option.database)
+            if not ok then return route:fail(err, 503) end
         end
 
-        self[options.name or "redis"] = r
+        self[option.name or "redis"] = rdb
 
-        route:after(function()
-            if options.max_idle_timeout and options.pool_size then
-                r:set_keepalive(options.max_idle_timeout, options.pool_size)
-            else
-                r:close()
-            end
-        end)
+        self.yield()
+
+        if option.max_idle_timeout and option.pool_size then
+            rdb:set_keepalive(option.max_idle_timeout, option.pool_size)
+        else
+            rdb:close()
+        end
     end
 end

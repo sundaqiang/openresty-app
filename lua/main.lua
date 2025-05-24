@@ -1,8 +1,12 @@
+local conf = require("utils.config")
 local route = require("resty.route").new()
 
-local deps = {}
+local svcs = {
+    c = conf,
+    l = require("utils.logger")
+}
 
-local middleware = require("middleware.main").new(deps)
+local middleware = require("middleware.main").new(svcs)
 
 middleware:add_middlewares_to(route)
 

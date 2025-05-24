@@ -1,26 +1,24 @@
-local logger = require("utils.logger")
-local conf = require("utils.config")
-
 local _M = {}
 
 _M.__index = _M
 
-function _M.new(deps)
-    obj = {
-        deps = deps
-    }
+function _M.new(svcs)
+    local obj = { svcs = svcs }
     setmetatable(obj, _M)
     return obj
 end
 
 function _M:add_middlewares_to(route)
+    local svcs = self.svcs
     route:use(function(self)
-        require("resty.route.middleware.form")
-        require("resty.route.middleware.reqargs")
-        require("resty.route.middleware.template")
-        require("utils.mysql"){conf.mysql}
-        require("utils.redis"){conf.redis}
+        self.svcs = svcs
     end)
+
+    route:use(require("resty.route.middleware.form"))
+    route:use(require("resty.route.middleware.reqargs"))
+    route:use(require("resty.route.middleware.template"))
+    route:use(require("utils.mysql"))
+    route:use(require("utils.redis"))
 end
 
 return _M
