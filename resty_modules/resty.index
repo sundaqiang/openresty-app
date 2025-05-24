@@ -579,3 +579,31 @@ module lua-resty-mysql-0.27
   section 23338 23826 see also
 
 # END lua-resty-mysql
+# BEGIN lua-resty-mlcache
+
+dist lua-resty-mlcache-2.7.0
+  aliases resty.mlcache
+  modules lua-resty-mlcache-2.7.0
+
+module lua-resty-mlcache-2.7.0
+  aliases resty.mlcache
+  section 18 3939 lua-resty-mlcache
+  section 3939 6038 synopsis
+  section 6038 6649 requirements
+  section 6649 7034 installation
+  section 7034 40876 methods
+  section 7052 13641 new
+  section 13641 24914 get
+  section 24914 28041 get_bulk
+  section 28041 29076 new_bulk
+  section 29076 29707 each_bulk_res
+  section 29707 32357 peek
+  section 32357 34155 set
+  section 34155 34915 delete
+  section 34915 36310 purge
+  section 36310 40876 update
+  section 40876 41069 resources
+  section 41069 41126 changelog
+  section 41126 41499 license
+
+# END lua-resty-mlcache
