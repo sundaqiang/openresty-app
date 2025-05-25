@@ -1,8 +1,8 @@
 # 项目依赖清单
 
-本文件列出了项目所需的所有依赖模块及其版本信息。请确保这些模块已正确安装，以确保项目正常运行。
+本文件列出了项目所需的所有依赖模块及其版本信息.请确保这些模块已正确安装,以确保项目正常运行.
 
-## 模块列表
+## 模块列表,
 
 | 模块名称                                                                                  | 版本号    | 描述                           |
 |---------------------------------------------------------------------------------------|--------|------------------------------|
@@ -25,5 +25,20 @@
 | [axpwx/lua-resty-qqwry](https://github.com/axpwx/restylib/tree/master/restylib/qqwry) | 0.01   | QQWry IP 库解析工具               |
 
 ## 安装步骤
-1. 安装依赖模块：
-2. 运行以下命令安装依赖模块：
+1. 安装openresty
+    ```bash
+    brew install openresty/brew/openresty
+    ```
+2. 安装依赖
+    ```bash
+    ./install.sh
+    ```
+## 启动步骤
+1. 创建环境变量文件
+    ```bash
+   cp .env .env.develop
+   export APP_ENV=develop
+   openresty -p `pwd` -c conf/nginx.conf -g 'daemon off;'
+   ```
+2. 未配置环境变量APP_ENV时,APP_ENV=develop
+3. 默认先读取.env,再读取.env.APP_ENV,且.env.APP_ENV覆盖.env

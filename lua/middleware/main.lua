@@ -22,8 +22,9 @@ function _M:add_middlewares_to(route)
     end)
 
     -- 添加中间件
-    route:use(require("resty.route.middleware.form"))
-    route:use(require("resty.route.middleware.reqargs"))
+    -- route:use(require("servers.form"))
+    route:use(require("servers.risk"))
+    route:use(require("servers.args"))
     route:use(require("resty.route.middleware.template"))
     route:use(require("servers.mysql"))
     route:use(require("servers.redis"))

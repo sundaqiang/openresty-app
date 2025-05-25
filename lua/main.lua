@@ -14,5 +14,6 @@ middleware:add_middlewares_to(route)
 
 -- 路由
 route:get("=/", require("controllers.home").index)
+route:post("=/", require("controllers.home").index)
 
 return route
