@@ -607,3 +607,16 @@ module lua-resty-mlcache-2.7.0
   section 41126 41499 license
 
 # END lua-resty-mlcache
+# BEGIN lua-resty-iconv
+
+dist lua-resty-iconv-0.2.0
+  aliases resty.iconv
+  modules lua-resty-iconv-0.2.0
+
+module lua-resty-iconv-0.2.0
+  aliases resty.iconv
+  section 18 2151 lua-resty-iconv
+  section 122 830 sample
+  section 830 2151 benchmark @ intel(r) core(tm) i3-4150 cpu @ 3.50ghz using ab -c10 -n50000 -k
+
+# END lua-resty-iconv
