@@ -29,39 +29,51 @@ return function(self)
         return  -- 确保后续代码不会执行
     end
 
-    -- self.log:info("redis: ", options)
+    self[options.name or "redis"] = function(custom_options)
+        -- 如果已经是 Redis 实例，则直接返回（避免重复初始化）
+        if getmetatable(self[options.name or "redis"]) then
+            return
+        end
 
-    local rdb, err = redis:new()
-    if not rdb then
-        return route:fail(err, 503)
+        -- 合并默认配置和自定义配置
+        custom_options = custom_options or options
+
+        self.log:info("redis: ", options)
+
+        local rdb, err = redis:new()
+        if not rdb then
+            return route:fail(err, 503)
+        end
+
+        local ok, err = rdb:connect(options.host or "127.0.0.1", options.port or 6379)
+        if not ok then
+            return route:fail(err, 503)
+        end
+
+        if options.timeout then
+            rdb:set_timeout(options.timeout)
+        end
+
+        if options.password then
+            ok, err = rdb:auth(options.password)
+            if not ok then return route:fail(err, 503) end
+        end
+
+        if options.database > 0 then
+            ok, err = rdb:select(options.database)
+            if not ok then return route:fail(err, 503) end
+        end
+
+        self[options.name or "redis"] = rdb
     end
 
-    local ok, err = rdb:connect(options.host or "127.0.0.1", options.port or 6379)
-    if not ok then
-        return route:fail(err, 503)
-    end
-
-    if options.timeout then
-        rdb:set_timeout(options.timeout)
-    end
-
-    if options.password then
-        ok, err = rdb:auth(options.password)
-        if not ok then return route:fail(err, 503) end
-    end
-
-    if options.database > 0 then
-        ok, err = rdb:select(options.database)
-        if not ok then return route:fail(err, 503) end
-    end
-
-    self[options.name or "redis"] = rdb
-
-    self.yield()
+    route.yield()
 
     if options.max_idle_timeout and options.pool_size then
-        rdb:set_keepalive(options.max_idle_timeout, options.pool_size)
+        self.log:info("redis: keepalive")
+        self[options.name or "redis"]:set_keepalive(options.max_idle_timeout, options.pool_size)
     else
-        rdb:close()
+        self.log:info("redis: close")
+        self[options.name or "redis"]:close()
     end
 end

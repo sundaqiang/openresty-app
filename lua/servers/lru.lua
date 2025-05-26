@@ -29,7 +29,7 @@ return function(self)
         return  -- 确保后续代码不会执行
     end
 
-    self.log:info("cache: ", options)
+    -- self.log:info("cache: ", options)
 
     local lru, err = mlcache.new(
             options.name,

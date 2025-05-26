@@ -94,7 +94,7 @@ local function cleanup(self)
         end
     end
     self.files = {}
-    self.log:info("cleanup")
+    -- self.log:info("cleanup")
 end
 
 return function(self)

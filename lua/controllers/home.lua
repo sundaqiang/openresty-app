@@ -29,6 +29,9 @@ function _M.index(self)
 
     local valid, fields, errors = self.post:check(schema)
 
+    self.rdb()
+    local rdb, err2 = self.rdb:get("sub:mch:config:1649057105")
+
     self:json({
         get = self.get,
         post = self.post,
@@ -41,6 +44,8 @@ function _M.index(self)
         qqwry = self.qqwry,
         ip2location = self.ip2location,
         ip2proxy = self.ip2proxy,
+        rdb = rdb,
+        err2 = err2,
     })
 
     self.done()
