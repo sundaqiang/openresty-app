@@ -39,6 +39,8 @@ function _M.index(self)
         headers = self.headers,
         real_ip = self.real_ip,
         qqwry = self.qqwry,
+        ip2location = self.ip2location,
+        ip2proxy = self.ip2proxy,
     })
 
     self.done()

@@ -27,12 +27,12 @@ return function(self)
 
     if not is_valid then
         -- 如果配置无效，记录日志并退出初始化逻辑
-        self.log:info("mysql: ", err_message, options)
+        -- self.log:info("mysql: ", err_message, options)
         self.yield()
         return  -- 确保后续代码不会执行
     end
 
-    self.log:info("mysql: ", options)
+    -- self.log:info("mysql: ", options)
 
     local db, err = mysql:new()
     if not db then
