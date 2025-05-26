@@ -9,10 +9,7 @@ Copyright (c) axpwx<axpwx08@gmail.com>
 
 local _M         = {_VERSION = '0.01'}
 local mt         = { __index = _M }
-local ffi        = require 'ffi'
 local ngx        = ngx
-local log        = ngx.log
-local ERR        = ngx.ERR
 local math       = math
 local string     = string
 local error      = error
@@ -22,68 +19,12 @@ local byte       = string.byte
 local tonumber   = tonumber
 local set_mt     = setmetatable
 local io_open    = io.open
-local ffi_c      = ffi.C
-local ffi_new    = ffi.new
-local ffi_cast   = ffi.cast
-local ffi_gc     = ffi.gc
-local ffi_string = ffi.string
-local ffi_typeof = ffi.typeof
-local ffi_errno  = ffi.errno
+local iconv = require "resty.iconv"
 
-ffi.cdef[[
-struct in_addr {
-  uint32_t s_addr;
-};
+local cd = iconv:new("UTF-8", "GBK")
 
-int inet_aton(const char *cp, struct in_addr *inp);
-uint32_t ntohl(uint32_t netlong);
-
-typedef void *iconv_t;
-iconv_t iconv_open (const char *__tocode, const char *__fromcode);
-size_t iconv (
-  iconv_t __cd,
-  char ** __inbuf, size_t * __inbytesleft,
-  char ** __outbuf, size_t * __outbytesleft
-);
-int iconv_close (iconv_t __cd);
-]]
-
--- 将GBK编码转为UTF-8
-local function iconv(s)
-  if not s or #s == 0 then return '' end
-
-  local maxsize      = 192
-  local char_ptr     = ffi_typeof('char *')
-  local char_ptr_ptr = ffi_typeof('char *[1]')
-  local sizet_ptr    = ffi_typeof('size_t[1]')
-  
-  local cd = ffi_c.iconv_open('UTF-8', 'GBK')
-  if cd == ffi_cast('iconv_t', ffi_new('int', -1)) then
-    ffi_c.iconv_close(cd)
-    log(ERR, 'iconv_open error')
-    return ''
-  end
-
-  cd = ffi_gc(cd, ffi_c.iconv_close)
-  local buffer   = ffi_new('char[' .. maxsize .. ']')
-  local dst_len  = ffi_new(sizet_ptr, maxsize)
-  local dst_buff = ffi_new(char_ptr_ptr, ffi_cast(char_ptr, buffer))
-  local src_len  = ffi_new(sizet_ptr, #s)
-  local src_buff = ffi_new(char_ptr_ptr)
-  src_buff[0]    = ffi_new('char['.. #s .. ']', s)
-
-  local ok = ffi_c.iconv(cd, src_buff, src_len, dst_buff, dst_len)
-  if ok < 0 then
-    ffi_c.iconv_close(ffi_gc(cd, nil))
-    log(ERR, 'failed to iconv, errno ' .. ffi_errno())
-    return ''
-  end
-
-  local len = maxsize - dst_len[0]
-  local dst = ffi_string(buffer, len)
-  ffi_c.iconv_close(ffi_gc(cd, nil))
-
-  return dst
+if not cd then
+  return ngx.log(ngx.ERR, "qqwry:init() can only be called in init phase")
 end
 
 -- 模拟文件IO
@@ -143,12 +84,12 @@ local function bin2big(s)
 end
 
 local function ip2long(ip)
-  local inp = ffi_new('struct in_addr[1]')
-  if ffi_c.inet_aton(ip, inp) ~= 0 then
-    return tonumber(ffi_c.ntohl(inp[0].s_addr))
-  end
-
-  return nil
+  if type(ip) ~= "string" then return nil end
+  local a, b, c, d = ip:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+  a, b, c, d = tonumber(a), tonumber(b), tonumber(c), tonumber(d)
+  if not (a and b and c and d) then return nil end
+  if a < 0 or a > 255 or b < 0 or b > 255 or c < 0 or c > 255 or d < 0 or d > 255 then return nil end
+  return a * 16777216 + b * 65536 + c * 256 + d
 end
 
 -- copy from https://github.com/lancelijade/qqwry.lua/blob/b1aebeaad204f6277e3f35f0d8c0547c1e80e967/qqwry.lua#L57
@@ -238,9 +179,12 @@ function _M.lookup(self, ip)
   loc1, offset = getOffsetLoc(self.qqwry, offset + 4)
   loc2 = offset and getOffsetLoc(self.qqwry, offset) or ''
 
+  _, loc1 = cd:convert(loc1)
+  _, loc2 = cd:convert(loc2)
+
   return {
-    region = iconv(loc1),
-    isp    = iconv(loc2)
+    region = loc1,
+    isp    = loc2
   }
 end
 

@@ -9,9 +9,6 @@ local ipairs      = ipairs
 local pairs       = pairs
 local ffi         = require "ffi"
 local ffi_cdef    = ffi.cdef
-local ffi_copy    = ffi.copy
-local ffi_new     = ffi.new
-local C           = ffi.C
 local insert_tab  = table.insert
 local sort_tab    = table.sort
 local string      = string
@@ -19,11 +16,9 @@ local setmetatable=setmetatable
 local type        = type
 local error       = error
 local str_sub     = string.sub
-local str_byte    = string.byte
 local cur_level   = ngx.config.subsystem == "http" and
                     require "ngx.errlog" .get_sys_filter_level()
 
-local AF_INET     = 2
 local AF_INET6    = 10
 if ffi.os == "OSX" then
     AF_INET6 = 30
@@ -39,85 +34,119 @@ ffi_cdef[[
 ]]
 
 
-local parse_ipv4
-do
-    local inet = ffi_new("unsigned int [1]")
-
-    function parse_ipv4(ip)
-        if not ip then
-            return false
-        end
-
-        if C.inet_pton(AF_INET, ip, inet) ~= 1 then
-            return false
-        end
-
-        return C.ntohl(inet[0])
+local function parse_ipv4(ip)
+    if not ip then return false end
+    local a,b,c,d = ip:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")
+    a, b, c, d = tonumber(a), tonumber(b), tonumber(c), tonumber(d)
+    if not (a and b and c and d) then return false end
+    if a < 0 or a > 255 or b < 0 or b > 255 or c < 0 or c > 255 or d < 0 or d > 255 then
+        return false
     end
+    -- 高字节在前（网络序）
+    return bit.bor(
+            bit.lshift(a,24),
+            bit.lshift(b,16),
+            bit.lshift(c,8),
+            d
+    )
 end
+
 _M.parse_ipv4 = parse_ipv4
 
-local parse_bin_ipv4
-do
-    local inet = ffi_new("unsigned int [1]")
+local function parse_bin_ipv4(ip)
+    if not ip or #ip ~= 4 then return false end
+    local a, b, c, d = ip:byte(1,4)
+    return bit.bor(
+            bit.lshift(a,24),
+            bit.lshift(b,16),
+            bit.lshift(c,8),
+            d
+    )
+end
 
-    function parse_bin_ipv4(ip)
-        if not ip or #ip ~= 4 then
-            return false
+-- 返回长度为16的字节数组，或false
+local function ipv6_to_bytes(ip)
+    -- 去掉方括号
+    if ip:sub(1,1) == "[" and ip:sub(-1,-1) == "]" then
+        ip = ip:sub(2,-2)
+    end
+
+    -- ::缩写展开处理
+    local parts = {}
+    local double_colon_pos = ip:find("::",1,true)
+    if double_colon_pos then
+        -- 分成两段，各自split(':')
+        local left = ip:sub(1,double_colon_pos-1)
+        local right = ip:sub(double_colon_pos+2)
+        for part in left:gmatch("[^:]+") do table.insert(parts, part) end
+        local missing = 8 - (#parts + select(2,right:gsub(":", "")) + (right~="" and 1 or 0))
+        for i=1,missing do table.insert(parts,"0") end
+        for part in right:gmatch("[^:]+") do table.insert(parts, part) end
+    else
+        for part in ip:gmatch("[^:]+") do table.insert(parts, part) end
+    end
+
+    -- 支持尾部嵌入式IPv4地址，如 ::ffff:192.168.0.1
+    if #parts > 0 and parts[#parts]:find("%.") then
+        local ipv4bytes = {parts[#parts]:match("(%d+)%.(%d+)%.(%d+)%.(%d+)")}
+        if #ipv4bytes == 4 then
+            parts[#parts] = string.format("%02x%02x", ipv4bytes[1], ipv4bytes[2])
+            table.insert(parts,string.format("%02x%02x", ipv4bytes[3], ipv4bytes[4]))
+        else
+            return false   -- 非法嵌入式IPv4格式
         end
+    end
 
-        ffi_copy(inet, ip, 4)
-        return C.ntohl(inet[0])
+    if #parts ~=8 then return false end
+
+    local bytes = {}
+    for i=1,8 do
+        local word = tonumber(parts[i],16)
+        if not word or word<0 or word>0xffff then return false end
+        table.insert(bytes, math.floor(word/256))
+        table.insert(bytes, word %256)
+    end
+
+    return bytes   -- 返回长度为16的字节数组，每个元素是0~255整数
+end
+
+-- 转换为四个uint32（与原C代码一致）
+local function parse_ipv6(ip)
+    local bytes = ipv6_to_bytes(ip)
+    if not bytes then return false end
+
+    local arr = {}
+    for i=0,3 do -- 每32位一个整数，高位在前（网络序）
+        arr[i+1] =
+        bit.bor(
+                bit.lshift(bytes[i*4+1],24),
+                bit.lshift(bytes[i*4+2],16),
+                bit.lshift(bytes[i*4+3],8),
+                bytes[i*4+4]
+        )
+    end
+    return arr -- 长度为4的数字数组，每个都是uint32（高位在前）
+end
+
+-- 二进制版，直接取字节拼装即可：
+local function parse_bin_ipv6(bin)
+    if type(bin)=="string" and #bin==16 then
+        local arr={}
+        for i=0,3 do
+            arr[i+1]=bit.bor(
+                    bit.lshift(bin:byte(i*4+1),24),
+                    bit.lshift(bin:byte(i*4+2),16),
+                    bit.lshift(bin:byte(i*4+3),8),
+                    bin:byte(i*4+4)
+            )
+        end
+        return arr
+    else
+        return false
     end
 end
 
-local parse_ipv6
-do
-    local inets = ffi_new("unsigned int [4]")
-
-    function parse_ipv6(ip)
-        if not ip then
-            return false
-        end
-
-        if str_byte(ip, 1, 1) == str_byte('[')
-            and str_byte(ip, #ip) == str_byte(']') then
-
-            -- strip square brackets around IPv6 literal if present
-            ip = str_sub(ip, 2, #ip - 1)
-        end
-
-        if C.inet_pton(AF_INET6, ip, inets) ~= 1 then
-            return false
-        end
-
-        local inets_arr = new_tab(4, 0)
-        for i = 0, 3 do
-            insert_tab(inets_arr, C.ntohl(inets[i]))
-        end
-        return inets_arr
-    end
-end
 _M.parse_ipv6 = parse_ipv6
-
-local parse_bin_ipv6
-do
-    local inets = ffi_new("unsigned int [4]")
-
-    function parse_bin_ipv6(ip)
-        if not ip or #ip ~= 16 then
-            return false
-        end
-
-        ffi_copy(inets, ip, 16)
-        local inets_arr = new_tab(4, 0)
-        for i = 0, 3 do
-            insert_tab(inets_arr, C.ntohl(inets[i]))
-        end
-        return inets_arr
-    end
-end
-
 
 local mt = {__index = _M}
 
