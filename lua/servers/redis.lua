@@ -1,79 +1,83 @@
 local redis = require "resty.redis"
 
--- 配置验证函数：检查必需字段是否有效（非 nil 且非空字符串）
 local function validate_options(options)
-    if not (options.name and options.host) then
+    if not (options and options.host) then
         return false, "缺少所需的Redis配置字段"
     end
-
-    if options.name == "" or options.host == "" then
+    if options.host == "" then
         return false, "Redis配置字段不能为空"
     end
-
     return true
 end
 
 return function(self)
     local route = self.route
-
-    -- 获取 Redis 配置选项并输出日志以供调试
     local options = self.conf.redis
 
-    -- 验证 Redis 配置选项是否齐全且有效
+    -- 校验配置有效性
     local is_valid, err_message = validate_options(options)
-
     if not is_valid then
-        -- 如果配置无效，记录日志并退出初始化逻辑
-        -- self.log:info("redis: ", err_message, options)
-        self.yield()
-        return  -- 确保后续代码不会执行
+        self.log:warn("redis: ", err_message, options)
+        return
     end
 
-    self[options.name or "redis"] = function(custom_options)
-        -- 如果已经是 Redis 实例，则直接返回（避免重复初始化）
-        if getmetatable(self[options.name or "redis"]) then
-            return
+    -- 工厂函数，返回已连接的 redis client 实例
+    self["redis"] = function(custom_options)
+        -- 避免重复创建实例（可选）
+        if type(self["__redis"]) == "table" then
+            return self["__redis"]
         end
 
-        -- 合并默认配置和自定义配置
-        custom_options = custom_options or options
-
-        self.log:info("redis: ", options)
+        local opt = custom_options or options
 
         local rdb, err = redis:new()
-        if not rdb then
-            return route:fail(err, 503)
-        end
+        if not rdb then return route:fail(err, 503) end
 
-        local ok, err = rdb:connect(options.host or "127.0.0.1", options.port or 6379)
-        if not ok then
-            return route:fail(err, 503)
-        end
+        local ok, err = rdb:connect(opt.host, opt.port or 6379)
+        if not ok then return route:fail(err, 503) end
 
-        if options.timeout then
-            rdb:set_timeout(options.timeout)
-        end
+        if opt.timeout and opt.timeout > 0 then rdb:set_timeout(opt.timeout) end
 
-        if options.password then
-            ok, err = rdb:auth(options.password)
+        if opt.password and opt.password ~= "" then
+            ok, err = rdb:auth(opt.password)
             if not ok then return route:fail(err, 503) end
         end
 
-        if options.database > 0 then
-            ok, err = rdb:select(options.database)
+        if opt.database and opt.database > 0 then
+            ok, err = rdb:select(opt.database)
             if not ok then return route:fail(err, 503) end
         end
 
-        self[options.name or "redis"] = rdb
+        -- 保存实例以便复用；你也可以每次新建，看具体业务需求
+        self["__redis"] = rdb
+        return rdb
     end
 
-    route.yield()
+    -- 用cleanup注册资源释放，优雅兼容不同OpenResty版本：
+    local cleanup_fn = function()
+        if self["__redis"] then
+            if options.max_idle_timeout and options.pool_size and options.max_idle_timeout > 0 and options.pool_size > 0 then
+                pcall(function()
+                    self.log:info("redis: set_keepalive")
+                    self["__redis"]:set_keepalive(options.max_idle_timeout, options.pool_size)
+                end)
+            else
+                pcall(function()
+                    self.log:info("redis: close")
+                    self["__redis"]:close()
+                end)
+            end
+            self["__redis"] = nil
+        end
+    end
 
-    if options.max_idle_timeout and options.pool_size then
-        self.log:info("redis: keepalive")
-        self[options.name or "redis"]:set_keepalive(options.max_idle_timeout, options.pool_size)
+    -- 优先使用 ngx.on_cleanup（OpenResty >= 1.21），否则 fallback 到 log_by_lua*
+    if ngx.on_cleanup then
+        local ok, err = ngx.on_cleanup(cleanup_fn)
+        if not ok then self.log:error("failed to register cleanup for redis:", err) end
     else
-        self.log:info("redis: close")
-        self[options.name or "redis"]:close()
+        ngx.ctx._finalizers = ngx.ctx._finalizers or {}
+        table.insert(ngx.ctx._finalizers, cleanup_fn)
     end
+
 end

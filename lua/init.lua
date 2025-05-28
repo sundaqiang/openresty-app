@@ -1,10 +1,8 @@
-
-
 local conf = require("servers.config")
 
 if conf.risk then
     if conf.risk.cz and conf.risk.cz == true then
-        local cz = require ('utils.new_qqwry')
+        local cz = require ('utils.qqwry_mac')
         qqwry = cz.init('ipdb/qqwry.dat')
     end
 

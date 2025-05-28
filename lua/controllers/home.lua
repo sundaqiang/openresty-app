@@ -13,9 +13,9 @@ function _M.index(self)
     -- 创建验证器实例       self.verify.new{}
     -- 验证请求参数       self.get:check(schema)
 
-    -- 获取mysql连接    self.db
-    -- 获取redis连接    self.rdb
-    -- 获取lru缓存      self.lru
+    -- 获取mysql连接    db = self.mysql(); db:query()
+    -- 获取redis连接    rdb = self.redis(); rdb:get()
+    -- 获取lru缓存      lru = self.cache(); lru:get()
 
     -- 返回json数据     self:json({})
     -- 返回html     self:render(content, context)
@@ -29,8 +29,29 @@ function _M.index(self)
 
     local valid, fields, errors = self.post:check(schema)
 
-    self.rdb()
-    local rdb, err2 = self.rdb:get("sub:mch:config:1649057105")
+    -- 启动“协程线程”
+    local th1 = ngx.thread.spawn(function()
+        local db = self.mysql()
+        return db:query("SELECT * FROM `store`.`open_api` LIMIT 0,1000")
+    end)
+
+    local th2 = ngx.thread.spawn(function()
+        local rdb = self.redis()
+        return rdb:get("sub:mch:config:1649057105")
+    end)
+
+    local th3 = ngx.thread.spawn(function()
+        local lru = self.cache()
+        return lru:get("sub:mch:config:1649057105")
+    end)
+
+    -- 等待两个结果
+    local ok1, res1, err1, errcode, sqlstate = ngx.thread.wait(th1)
+    local ok2, res2, err2 = ngx.thread.wait(th2)
+    local ok3, res3, err3 = ngx.thread.wait(th3)
+
+    local risk = self.risk(true, false, true)
+
 
     self:json({
         get = self.get,
@@ -39,37 +60,20 @@ function _M.index(self)
         valid = valid,
         fields = fields,
         errors = errors,
-        headers = self.headers,
-        real_ip = self.real_ip,
-        qqwry = self.qqwry,
-        ip2location = self.ip2location,
-        ip2proxy = self.ip2proxy,
-        rdb = rdb,
+        headers = risk.headers,
+        real_ip = risk.real_ip,
+        qqwry = risk.qqwry,
+        ip2location = risk.ip2location,
+        ip2proxy = risk.ip2proxy,
+        res1 = res1,
+        err1 = err1,
+        res2 = res2,
         err2 = err2,
+        res3 = res3,
+        err3 = err3,
     })
 
     self.done()
-
-
-
-    local lru, err1 = self.lru:get("sub:mch:config:1649057105")
-
-    local rdb, err2 = self.rdb:get("sub:mch:config:1649057105")
-
-    local res, err3, errcode, sqlstate =
-        self.db:query("SELECT * FROM `store`.`open_api` LIMIT 0,1000")
-
-    ngx.say(cjson.encode({
-        data = self.conf,
-
-        res = res,
-        lru = lru,
-        rdb = rdb,
-        err1 = err1,
-        err2 = err2,
-        err3 = err3,
-    }))
-    ngx.exit(ngx.OK)
 end
 
 return _M
