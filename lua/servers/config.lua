@@ -12,7 +12,16 @@ end
 
 local _app_env = os.getenv("APP_ENV") or "develop"
 
-local _env_files = {".env", string.format(".env.%s", _app_env)}
+local _config_path = os.getenv("CONFIG_PATH") or ""
+
+if #_config_path > 0 and not _config_path:match("/$") then
+    _config_path = _config_path .. "/"
+end
+
+local _env_files = {
+    string.format("%s.env", _config_path),
+    string.format("%s.env.%s", _config_path, _app_env)
+}
 
 local _env_table = dotenv(_env_files)
 

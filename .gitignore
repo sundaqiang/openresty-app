@@ -1,5 +1,5 @@
 /.idea/
 /logs/
 /tmp/
-.env.*
+**/.env.*
 /ipdb/*.BIN
