@@ -15,20 +15,19 @@ return function(self)
     local route = self.route
     local options = self.conf.mysql
 
-    -- 验证选项有效性
-    local is_valid, err_message = validate_options(options)
-    if not is_valid then
-        self.log:warn("mysql: ", err_message, options)
-        return
-    end
-
     -- 工厂函数，返回已连接的 mysql client 实例（可支持 custom_options）
     self["mysql"] = function(custom_options)
         if type(self["__mysql"]) == "table" then
             return self["__mysql"]
         end
 
+        -- 验证选项有效性
         local opt = custom_options or options
+        local is_valid, err_message = validate_options(opt)
+        if not is_valid then
+            self.log:warn("mysql", err_message, opt)
+            return nil -- 或者 route:fail(err_message, 503)
+        end
 
         local db, err = mysql:new()
         if not db then return route:fail(err, 503) end
@@ -56,12 +55,12 @@ return function(self)
         if self["__mysql"] then
             if options.max_idle_timeout and options.pool_size and options.max_idle_timeout>0 and options.pool_size>0 then
                 pcall(function()
-                    self.log:info("mysql: set_keepalive")
+                    -- self.log:info("mysql: set_keepalive")
                     self["__mysql"]:set_keepalive(options.max_idle_timeout, options.pool_size)
                 end)
             else
                 pcall(function()
-                    self.log:info("mysql: close")
+                    -- self.log:info("mysql: close")
                     self["__mysql"]:close()
                 end)
             end

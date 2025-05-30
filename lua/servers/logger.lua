@@ -27,11 +27,12 @@ Logger:set_globle_opts({
         local caller = find_caller(conf.log.caller_depth)
         return cjson.encode({
             ts = ngx.localtime(),
-            scope = log.scope,
+            -- scope = log.scope,
             level = log.level,
             message = log.message,
             error = log.error,
             data = log.data,
+            trace_id = ngx.var.request_id,
             caller = caller
         })
     end

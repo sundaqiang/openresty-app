@@ -1,6 +1,8 @@
 return function(self)
     local keys = {"qqwry", "ip2location", "ip2proxy"}
 
+    self.trace_id = ngx.var.request_id
+
     self["risk"] = function(...)
         local args = {...}
         local opts = {}
@@ -12,7 +14,6 @@ return function(self)
 
         risk.headers = ngx.req.get_headers()
         risk.real_ip = risk.headers["X-Forwarded-For"] or risk.headers["X-Real-IP"] or ngx.var.remote_addr
-        risk.real_ip = "222.137.233.100"
 
         if qqwry and opts.qqwry then
             local res, err = qqwry:lookup(risk.real_ip)

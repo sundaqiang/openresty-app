@@ -15,20 +15,19 @@ return function(self)
     local route = self.route
     local options = self.conf.cache
 
-    -- 校验配置有效性
-    local is_valid, err_message = validate_options(options)
-    if not is_valid then
-        self.log:warn("cache: ", err_message, options)
-        return
-    end
-
     -- 工厂函数，返回已初始化的 mlcache 实例（支持 custom_options）
     self["cache"] = function(custom_options)
         if type(self["__cache"]) == "table" then
             return self["__cache"]
         end
 
+        -- 验证选项有效性
         local opt = custom_options or options
+        local is_valid, err_message = validate_options(opt)
+        if not is_valid then
+            self.log:warn("cache", err_message, opt)
+            return nil -- 或者 route:fail(err_message, 503)
+        end
 
         local lru, err = mlcache.new(
                 opt.name,

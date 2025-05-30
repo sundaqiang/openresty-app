@@ -5,6 +5,7 @@ local _M = {}
 function _M.index(self)
     -- 获取项目的配置      self.conf
     -- 打印日志             self.log:info("打印日志", {data = ""})
+    -- 获取请求trace_id     self.trace_id
 
     -- 获取请求数据       self.get
     -- 获取请求数据       self.post
@@ -20,6 +21,10 @@ function _M.index(self)
     -- 返回json数据     self:json({})
     -- 返回html     self:render(content, context)
     -- 结束路由运行     self.done()
+
+    self.log:info("index", {
+        trace_id = self.trace_id,
+    })
 
     local schema = self.verify.new {
         username = self.verify.string:len(5, 200), -- 字符串，长度在 5 到 20 之间

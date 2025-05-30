@@ -17,7 +17,7 @@ return function(self)
     -- 校验配置有效性
     local is_valid, err_message = validate_options(options)
     if not is_valid then
-        self.log:warn("redis: ", err_message, options)
+        self.log:warn("redis", err_message, options)
         return
     end
 
@@ -28,7 +28,13 @@ return function(self)
             return self["__redis"]
         end
 
+        -- 验证选项有效性
         local opt = custom_options or options
+        local is_valid, err_message = validate_options(opt)
+        if not is_valid then
+            self.log:warn("redis", err_message, opt)
+            return nil -- 或者 route:fail(err_message, 503)
+        end
 
         local rdb, err = redis:new()
         if not rdb then return route:fail(err, 503) end
@@ -58,12 +64,12 @@ return function(self)
         if self["__redis"] then
             if options.max_idle_timeout and options.pool_size and options.max_idle_timeout > 0 and options.pool_size > 0 then
                 pcall(function()
-                    self.log:info("redis: set_keepalive")
+                    -- self.log:info("redis: set_keepalive")
                     self["__redis"]:set_keepalive(options.max_idle_timeout, options.pool_size)
                 end)
             else
                 pcall(function()
-                    self.log:info("redis: close")
+                    -- self.log:info("redis: close")
                     self["__redis"]:close()
                 end)
             end
