@@ -14,10 +14,7 @@ middleware:add_middlewares_to(route)
 
 -- 路由
 route:get("=/", require("controllers.home").index)
-route:post("=/", require("controllers.home").index)
 
-route "#/state([/]?)([^/]*)$" {
-    get = require("controllers.home").index
-}
+route:get("@/s/:string", require("controllers.builder").index)
 
 return route
