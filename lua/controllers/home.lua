@@ -55,7 +55,7 @@ function _M.index(self)
     local ok2, res2, err2 = ngx.thread.wait(th2)
     local ok3, res3, err3 = ngx.thread.wait(th3)
 
-    local risk = self.risk(true, false, true)
+    local risk = self.risk(true, false, false)
 
 
     self:json({

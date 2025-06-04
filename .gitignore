@@ -1,5 +1,11 @@
-/.idea/
-/logs/
-/tmp/
-**/.env.*
+.vscode
+.idea
+.DS_Store
+
+tmp/
+
+*.log
+*.pid
+
+.env*
 /ipdb/*.BIN

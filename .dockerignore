@@ -1,0 +1,21 @@
+# 忽略 resty_modules
+resty_modules
+
+# 忽略 git 相关
+.vscode
+.idea
+.DS_Store
+.git
+.gitignore
+
+# 忽略 docker 相关
+.dockerignore
+Dockerfile
+
+# 其它不需要的文件或目录
+tmp/
+*.log
+*.pid
+.env*
+/ipdb/*.BIN
+README.md
